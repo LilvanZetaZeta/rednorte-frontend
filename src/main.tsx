@@ -1,28 +1,17 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { Auth0Provider } from '@auth0/auth0-react'
-import { BrowserRouter } from 'react-router-dom'
-import App from './App'
-import './index.css'
-
-// Le agregamos "as string" para calmar a TypeScript
-const domain = import.meta.env.VITE_AUTH0_DOMAIN as string;
-const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID as string;
-const audience = import.meta.env.VITE_AUTH0_AUDIENCE as string;
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { Provider } from 'react-redux';
+import { BrowserRouter } from 'react-router-dom';
+import { store } from './store/store';
+import App from './App.tsx';
+import './index.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
-      <Auth0Provider
-        domain={domain}
-        clientId={clientId}
-        authorizationParams={{
-          redirect_uri: window.location.origin,
-          audience: audience
-        }}
-      >
+    <Provider store={store}>
+      <BrowserRouter>
         <App />
-      </Auth0Provider>
-    </BrowserRouter>
+      </BrowserRouter>
+    </Provider>
   </StrictMode>,
-)
+);
