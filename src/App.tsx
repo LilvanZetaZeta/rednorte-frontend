@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './config/supabaseClient';
 import type { Session } from '@supabase/supabase-js';
+
+// Vistas
 import PortalPaciente from './views/PortalPaciente';
+import PortalDoctor from './views/PortalDoctor';
+import DashboardAdmin from './views/DashboardAdmin';
 
 function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -47,7 +51,13 @@ function App() {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: fullName, rut: rut } }
+        options: { 
+          data: { 
+            full_name: fullName, 
+            rut: rut,
+            rol: 'paciente' // <-- AQUÍ: Forzamos el rol por defecto en el registro público
+          } 
+        }
       });
       if (error) {
         setAuthError(error.message);
@@ -64,12 +74,33 @@ function App() {
     return <div className="p-12 text-center text-primary font-h3 text-xl">Conectando...</div>;
   }
 
-  // Si hay sesión, mandamos directo al portal
+  // --- LÓGICA DE RUTEO BASADA EN ROLES ---
   if (session) {
+    // Extraemos el rol de la metadata. Si por alguna razón no tiene, asumimos 'paciente' por seguridad.
+    const userRole = session.user.user_metadata?.rol || 'paciente';
+
     return (
       <Routes>
-        <Route path="/*" element={<Navigate to="/portal" replace />} />
-        <Route path="/portal" element={<PortalPaciente />} />
+        {userRole === 'paciente' && (
+          <>
+            <Route path="/portal" element={<PortalPaciente />} />
+            <Route path="*" element={<Navigate to="/portal" replace />} />
+          </>
+        )}
+        
+        {userRole === 'doctor' && (
+          <>
+            <Route path="/doctor/agenda" element={<PortalDoctor />} />
+            <Route path="*" element={<Navigate to="/doctor/agenda" replace />} />
+          </>
+        )}
+
+        {userRole === 'admin' && (
+          <>
+            <Route path="/admin/dashboard" element={<DashboardAdmin />} />
+            <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+          </>
+        )}
       </Routes>
     );
   }
