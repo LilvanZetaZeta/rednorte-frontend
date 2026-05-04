@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthVM } from './viewmodels/useAuthVM';
 import { ShieldPlus, BadgeCheck, ArrowRight, X } from 'lucide-react';
+import heroImage from './assets/hero.webp';
 import PortalPaciente from './views/PortalPaciente';
 import PortalDoctor from './views/PortalDoctor';
 import DashboardAdmin from './views/DashboardAdmin';
@@ -64,6 +65,9 @@ function App() {
                       </button>
                     </div>
                   )}
+                </div>
+                <div className="flex-1 hidden lg:flex items-center justify-center">
+                  <img src={heroImage} alt="Servicio de Salud RedNorte" className="w-full h-auto max-w-lg object-cover rounded-lg" />
                 </div>
               </section>
             </main>
