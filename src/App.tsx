@@ -1,295 +1,118 @@
-import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { supabase } from './config/supabaseClient';
-import type { Session } from '@supabase/supabase-js';
+import { useAuthVM } from './viewmodels/useAuthVM';
 
 // Vistas
 import PortalPaciente from './views/PortalPaciente';
 import PortalDoctor from './views/PortalDoctor';
 import DashboardAdmin from './views/DashboardAdmin';
+import Layout from './views/Layout';
 
 function App() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [isInitializing, setIsInitializing] = useState(true);
+  const vm = useAuthVM();
 
-  // Estados de interfaz
-  const [showAuthForm, setShowAuthForm] = useState(false);
-  const [isLogin, setIsLogin] = useState(true); 
-  
-  // Estados de datos
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState(''); 
-  const [rut, setRut] = useState(''); 
-  const [authError, setAuthError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setIsInitializing(false);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setAuthError('');
-    
-    if (isLogin) {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) setAuthError('Credenciales incorrectas.');
-    } else {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { 
-          data: { 
-            full_name: fullName, 
-            rut: rut,
-            rol: 'paciente' // <-- AQUÍ: Forzamos el rol por defecto en el registro público
-          } 
-        }
-      });
-      if (error) {
-        setAuthError(error.message);
-      } else {
-        alert('Cuenta creada. Ya puedes iniciar sesión.');
-        setIsLogin(true);
-        setPassword('');
-      }
-    }
-    setIsLoading(false);
-  };
-
-  if (isInitializing) {
-    return <div className="p-12 text-center text-primary font-h3 text-xl">Conectando...</div>;
+  if (vm.isInitializing) {
+    return <div className="min-h-screen flex items-center justify-center text-primary font-h3 text-xl">Conectando...</div>;
   }
 
-  // --- LÓGICA DE RUTEO BASADA EN ROLES ---
-  if (session) {
-    // Extraemos el rol de la metadata. Si por alguna razón no tiene, asumimos 'paciente' por seguridad.
-    const userRole = session.user.user_metadata?.rol || 'paciente';
+  // --- LÓGICA DE RUTEO PROTEGIDO CON LAYOUT ---
+  if (vm.session) {
+    const userRole = vm.session.user.user_metadata?.rol || 'paciente';
 
     return (
       <Routes>
-        {userRole === 'paciente' && (
-          <>
-            <Route path="/portal" element={<PortalPaciente />} />
-            <Route path="*" element={<Navigate to="/portal" replace />} />
-          </>
-        )}
-        
-        {userRole === 'doctor' && (
-          <>
-            <Route path="/doctor/agenda" element={<PortalDoctor />} />
-            <Route path="*" element={<Navigate to="/doctor/agenda" replace />} />
-          </>
-        )}
+        <Route element={<Layout />}>
+          
+          {userRole === 'paciente' && (
+            <>
+              <Route path="/portal" element={<PortalPaciente />} />
+              <Route path="*" element={<Navigate to="/portal" replace />} />
+            </>
+          )}
+          
+          {userRole === 'doctor' && (
+            <>
+              <Route path="/doctor/agenda" element={<PortalDoctor />} />
+              <Route path="*" element={<Navigate to="/doctor/agenda" replace />} />
+            </>
+          )}
 
-        {userRole === 'admin' && (
-          <>
-            <Route path="/admin/dashboard" element={<DashboardAdmin />} />
-            <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
-          </>
-        )}
+          {userRole === 'admin' && (
+            <>
+              <Route path="/admin/dashboard" element={<DashboardAdmin />} />
+              <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+            </>
+          )}
+
+        </Route>
       </Routes>
     );
   }
 
-  // --- VISTA HTML DE LA PÁGINA INICIAL (NO LOGUEADO) ---
+  // --- VISTA PÚBLICA (Landing Page) ---
   return (
-    <div className="bg-background text-on-background font-body-md text-body-md antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen flex flex-col">
-      
-      {/* TopAppBar */}
-      <header className="fixed top-0 w-full z-50 h-16 bg-white/95 backdrop-blur-md border-b border-surface-variant shadow-sm flex justify-between items-center px-6 lg:px-12 font-sans antialiased text-[#191c20] transition-opacity">
+    <div className="bg-background text-on-background font-body-md text-body-md min-h-screen flex flex-col">
+       <header className="fixed top-0 w-full z-50 h-16 bg-white/95 backdrop-blur-md border-b border-surface-variant shadow-sm flex justify-between items-center px-6 lg:px-12 font-sans antialiased text-[#191c20]">
         <div className="text-lg font-bold tracking-tight text-primary flex items-center gap-2">
           <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>health_and_safety</span>
           Servicio de Salud RedNorte
         </div>
-        <div className="flex items-center gap-4 text-on-surface-variant">
-          <button className="hover:text-primary transition-colors p-2 rounded-full hover:bg-surface-container-low flex items-center justify-center">
-            <span className="material-symbols-outlined">notifications</span>
-          </button>
-          <button className="hover:text-primary transition-colors p-2 rounded-full hover:bg-surface-container-low flex items-center justify-center">
-            <span className="material-symbols-outlined">help_outline</span>
-          </button>
-          <button className="hover:text-primary transition-colors p-2 rounded-full hover:bg-surface-container-low flex items-center justify-center">
-            <span className="material-symbols-outlined">account_circle</span>
-          </button>
-        </div>
       </header>
 
-      {/* Main Content Canvas */}
       <main className="pt-[80px] pb-xl px-gutter max-w-[1280px] mx-auto w-full flex flex-col gap-xl">
-        
-        {/* Hero Section */}
         <section className="flex flex-col lg:flex-row gap-lg items-center justify-between min-h-[716px]">
-          
           <div className="flex-1 flex flex-col gap-md max-w-2xl z-10">
-            {!showAuthForm ? (
-              // VISTA POR DEFECTO (TEXTO Y BOTONES)
+            {!vm.showAuthForm ? (
               <>
-                <div className="inline-flex items-center gap-2 px-sm py-xs bg-surface-container-high text-on-surface-variant rounded-full font-label-sm text-label-sm w-fit shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] border border-[#E2E8F0]">
+                <div className="inline-flex items-center gap-2 px-sm py-xs bg-surface-container-high text-on-surface-variant rounded-full font-label-sm text-label-sm w-fit shadow-sm border border-[#E2E8F0]">
                   <span className="material-symbols-outlined text-[16px] text-primary">verified</span>
                   Sistema de Gestión Clínica
                 </div>
                 <h1 className="font-h1 text-h1 text-on-background text-balance leading-tight">
                   Cuidando tu salud en el norte de Chile
                 </h1>
-                <p className="font-body-lg text-body-lg text-on-surface-variant text-pretty max-w-xl">
-                  Experimente una atención médica sin interrupciones con nuestra red moderna y unificada. Proporcionamos entornos digitales eficientes y centrados en el ser humano tanto para pacientes como para proveedores de atención médica, reduciendo la carga cognitiva y priorizando su bienestar.
-                </p>
                 <div className="flex flex-wrap items-center gap-md pt-sm">
                   <button 
-                    onClick={() => setShowAuthForm(true)}
-                    className="bg-primary text-on-primary font-label-sm text-label-sm px-md py-sm rounded-lg hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] border border-[#E2E8F0] flex items-center gap-2"
+                    onClick={() => vm.setShowAuthForm(true)}
+                    className="bg-primary text-on-primary font-label-sm text-label-sm px-md py-sm rounded-lg hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-sm border flex items-center gap-2"
                   >
-                    Portal del Paciente
-                    <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-                  </button>
-                  <button className="bg-secondary-container text-on-secondary-container font-label-sm text-label-sm px-md py-sm rounded-lg hover:bg-surface-variant transition-colors flex items-center gap-2">
-                    Acceso Institucional
-                    <span className="material-symbols-outlined text-[18px]">login</span>
+                    Portal del Paciente <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
                   </button>
                 </div>
               </>
             ) : (
-              // VISTA DE FORMULARIO INYECTADA EN EL HERO
-              <div className="bg-surface-container-lowest p-8 rounded-2xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] border border-surface-variant w-full max-w-md animate-fade-in">
+              <div className="bg-surface-container-lowest p-8 rounded-2xl shadow-sm border border-surface-variant w-full max-w-md animate-fade-in">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="font-h2 text-[24px] text-on-background">{isLogin ? 'Iniciar Sesión' : 'Registro de Paciente'}</h2>
-                  <button onClick={() => setShowAuthForm(false)} className="text-on-surface-variant hover:text-error transition-colors">
+                  <h2 className="font-h2 text-[24px] text-on-background">{vm.isLogin ? 'Iniciar Sesión' : 'Registro'}</h2>
+                  <button onClick={() => vm.setShowAuthForm(false)} className="text-on-surface-variant hover:text-error transition-colors">
                     <span className="material-symbols-outlined">close</span>
                   </button>
                 </div>
                 
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                  {!isLogin && (
+                <form onSubmit={vm.handleSubmit} className="flex flex-col gap-4">
+                  {!vm.isLogin && (
                     <>
-                      <div>
-                        <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">Nombre Completo</label>
-                        <input type="text" required={!isLogin} value={fullName} onChange={e => setFullName(e.target.value)}
-                          className="w-full px-4 py-2 border border-outline-variant rounded-lg bg-surface text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none" />
-                      </div>
-                      <div>
-                        <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">RUT</label>
-                        <input type="text" required={!isLogin} value={rut} onChange={e => setRut(e.target.value)} placeholder="12.345.678-9"
-                          className="w-full px-4 py-2 border border-outline-variant rounded-lg bg-surface text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none" />
-                      </div>
+                      <input type="text" required value={vm.fullName} onChange={e => vm.setFullName(e.target.value)} placeholder="Nombre Completo" className="w-full px-4 py-2 border rounded-lg outline-none focus:border-primary" />
+                      <input type="text" required value={vm.rut} onChange={e => vm.setRut(e.target.value)} placeholder="RUT (ej. 12.345.678-9)" className="w-full px-4 py-2 border rounded-lg outline-none focus:border-primary" />
                     </>
                   )}
-                  <div>
-                    <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">Correo Electrónico</label>
-                    <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
-                      className="w-full px-4 py-2 border border-outline-variant rounded-lg bg-surface text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none" />
-                  </div>
-                  <div>
-                    <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">Contraseña</label>
-                    <input type="password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)}
-                      className="w-full px-4 py-2 border border-outline-variant rounded-lg bg-surface text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none" />
-                  </div>
+                  <input type="email" required value={vm.email} onChange={e => vm.setEmail(e.target.value)} placeholder="Correo Electrónico" className="w-full px-4 py-2 border rounded-lg outline-none focus:border-primary" />
+                  <input type="password" required minLength={6} value={vm.password} onChange={e => vm.setPassword(e.target.value)} placeholder="Contraseña" className="w-full px-4 py-2 border rounded-lg outline-none focus:border-primary" />
                   
-                  {authError && (
-                    <div className="p-3 bg-error-container text-on-error-container font-caption text-caption rounded-lg flex items-center gap-2">
-                      <span className="material-symbols-outlined text-[18px]">error</span> {authError}
-                    </div>
-                  )}
-
-                  <button type="submit" disabled={isLoading} className="w-full bg-primary text-on-primary font-label-sm text-label-sm py-3 rounded-lg hover:bg-primary-container mt-2 transition-colors disabled:opacity-50">
-                    {isLoading ? 'Procesando...' : (isLogin ? 'Acceder al Portal' : 'Completar Registro')}
+                  {vm.authError && <div className="p-3 bg-error-container text-error rounded-lg text-sm">{vm.authError}</div>}
+                  <button type="submit" disabled={vm.isLoading} className="w-full bg-primary text-on-primary py-3 rounded-lg hover:bg-primary-container transition-colors disabled:opacity-50">
+                    {vm.isLoading ? 'Procesando...' : (vm.isLogin ? 'Acceder' : 'Registrarse')}
                   </button>
                 </form>
-                
                 <div className="mt-6 text-center">
-                  <button onClick={() => setIsLogin(!isLogin)} className="font-label-sm text-label-sm text-primary hover:underline">
-                    {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya eres paciente? Inicia sesión'}
+                  <button onClick={() => vm.setIsLogin(!vm.isLogin)} className="text-primary hover:underline text-sm">
+                    {vm.isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya eres paciente? Inicia sesión'}
                   </button>
                 </div>
               </div>
             )}
           </div>
-
-          <div className="flex-1 w-full lg:w-auto relative">
-            {/* Imagen abstracta de la clínica */}
-            <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] border border-[#E2E8F0] bg-surface-container-highest">
-              <img alt="Modern healthcare professional" className="w-full h-full object-cover" 
-                src="https://burst.shopifycdn.com/photos/stethoscope-scrubs.jpg"/>
-              
-              {/* Tarjeta flotante */}
-              <div className="absolute bottom-md left-md bg-white/80 backdrop-blur-md p-md rounded-xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] border border-[#E2E8F0] flex items-center gap-sm">
-                <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container">
-                  <span className="material-symbols-outlined">favorite</span>
-                </div>
-                <div>
-                  <div className="font-label-sm text-label-sm text-on-surface-variant">Estado de la Red</div>
-                  <div className="font-h3 text-h3 text-primary">Óptimo</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Bento Grid (Beneficios) */}
-        <section className="flex flex-col gap-lg pt-lg border-t border-surface-variant">
-          <div className="flex flex-col gap-sm max-w-2xl">
-            <h2 className="font-h2 text-h2 text-on-background">Modernizando la Prestación de Salud</h2>
-            <p className="font-body-md text-body-md text-on-surface-variant">Nuestra plataforma está construida sobre principios de minimalismo de alta utilidad, asegurando que la información crítica sea fácilmente accesible.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
-            <div className="bg-surface-container-lowest p-lg rounded-2xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] border border-[#E2E8F0] flex flex-col gap-md hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 rounded-lg bg-secondary-container text-on-secondary-container flex items-center justify-center">
-                <span className="material-symbols-outlined text-[24px]">event_repeat</span>
-              </div>
-              <div>
-                <h3 className="font-h3 text-h3 text-on-surface mb-xs">Reprogramación Automatizada</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant">Gestión inteligente de calendarios que optimiza de forma autónoma los horarios de las citas.</p>
-              </div>
-            </div>
-            <div className="bg-surface-container-lowest p-lg rounded-2xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] border border-[#E2E8F0] flex flex-col gap-md hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 rounded-lg bg-secondary-container text-on-secondary-container flex items-center justify-center">
-                <span className="material-symbols-outlined text-[24px]">hub</span>
-              </div>
-              <div>
-                <h3 className="font-h3 text-h3 text-on-surface mb-xs">Red Unificada</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant">Un sistema interconectado y sin fisuras que une múltiples instalaciones en toda la región.</p>
-              </div>
-            </div>
-            <div className="bg-surface-container-lowest p-lg rounded-2xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] border border-[#E2E8F0] flex flex-col gap-md hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 rounded-lg bg-secondary-container text-on-secondary-container flex items-center justify-center">
-                <span className="material-symbols-outlined text-[24px]">notifications_active</span>
-              </div>
-              <div>
-                <h3 className="font-h3 text-h3 text-on-surface mb-xs">Alertas en Tiempo Real</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant">Notificaciones instantáneas y de bajo perfil para actualizaciones críticas y resultados de laboratorio.</p>
-              </div>
-            </div>
-          </div>
         </section>
       </main>
-
-      {/* Footer */}
-      <footer className="bg-surface-container-low border-t border-surface-variant py-lg mt-auto">
-        <div className="max-w-[1280px] mx-auto px-gutter flex flex-col md:flex-row justify-between items-center gap-md">
-          <div className="flex items-center gap-2 text-primary font-bold">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>health_and_safety</span>
-            Servicio de Salud RedNorte
-          </div>
-          <div className="flex gap-md font-label-sm text-label-sm text-on-surface-variant">
-            <a className="hover:text-primary transition-colors" href="#">Política de Privacidad</a>
-            <a className="hover:text-primary transition-colors" href="#">Términos de Servicio</a>
-          </div>
-          <div className="font-caption text-caption text-outline">© 2026 RedNorte. Todos los derechos reservados.</div>
-        </div>
-      </footer>
     </div>
   );
 }
