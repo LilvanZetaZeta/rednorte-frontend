@@ -1,5 +1,6 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useLayoutVM } from '../viewmodels/useLayoutVM';
+import { ShieldPlus, Menu, X, LogOut, Calendar, PlusCircle, CalendarCheck, FileText, BarChart3, UserSquare } from 'lucide-react';
 
 export default function Layout() {
   const location = useLocation();
@@ -9,16 +10,16 @@ export default function Layout() {
   // Configuración de rutas dinámicas según el rol
   const menuItems = [
     ...(vm.userRole === 'paciente' ? [
-      { name: 'Mis Reservas', path: '/portal', icon: 'calendar_month' },
-      { name: 'Agendar Hora', path: '/agendar', icon: 'add_circle' },
+      { name: 'Mis Reservas', path: '/portal', icon: Calendar },
+      { name: 'Agendar Hora', path: '/agendar', icon: PlusCircle },
     ] : []),
     ...(vm.userRole === 'doctor' ? [
-      { name: 'Mi Agenda', path: '/doctor/agenda', icon: 'event_available' },
-      { name: 'Historial Pacientes', path: '/doctor/pacientes', icon: 'clinical_notes' },
+      { name: 'Mi Agenda', path: '/doctor/agenda', icon: CalendarCheck },
+      { name: 'Historial Pacientes', path: '/doctor/pacientes', icon: FileText },
     ] : []),
     ...(vm.userRole === 'admin' ? [
-      { name: 'Dashboard Central', path: '/admin/dashboard', icon: 'analytics' },
-      { name: 'Gestión Personal', path: '/admin/personal', icon: 'badge' },
+      { name: 'Dashboard Central', path: '/admin/dashboard', icon: BarChart3 },
+      { name: 'Gestión Personal', path: '/admin/personal', icon: UserSquare },
     ] : [])
   ];
 
@@ -31,11 +32,11 @@ export default function Layout() {
             onClick={vm.toggleMobileMenu}
             className="lg:hidden p-2 rounded-full hover:bg-surface-container-low text-on-surface-variant flex items-center justify-center"
           >
-            <span className="material-symbols-outlined">{vm.isMobileMenuOpen ? 'close' : 'menu'}</span>
+            {vm.isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
           
           <div className="text-lg font-bold tracking-tight text-primary flex items-center gap-2">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>health_and_safety</span>
+            <ShieldPlus className="w-6 h-6" />
             RedNorte CMS
           </div>
         </div>
@@ -50,7 +51,7 @@ export default function Layout() {
             title="Cerrar Sesión"
             className="text-error hover:bg-error-container hover:text-on-error-container transition-colors p-2 rounded-full flex items-center justify-center"
           >
-            <span className="material-symbols-outlined">logout</span>
+            <LogOut className="w-5 h-5" />
           </button>
         </div>
       </header>
@@ -70,9 +71,7 @@ export default function Layout() {
                     : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface'
                 }`}
               >
-                <span className="material-symbols-outlined" style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}>
-                  {item.icon}
-                </span>
+                <item.icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5px]' : ''}`} />
                 {item.name}
               </Link>
             );

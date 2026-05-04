@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthVM } from './viewmodels/useAuthVM';
+import { ShieldPlus, BadgeCheck, ArrowRight, X } from 'lucide-react';
 
 // Vistas
 import PortalPaciente from './views/PortalPaciente';
@@ -53,7 +54,7 @@ function App() {
     <div className="bg-background text-on-background font-body-md text-body-md min-h-screen flex flex-col">
        <header className="fixed top-0 w-full z-50 h-16 bg-white/95 backdrop-blur-md border-b border-surface-variant shadow-sm flex justify-between items-center px-6 lg:px-12 font-sans antialiased text-[#191c20]">
         <div className="text-lg font-bold tracking-tight text-primary flex items-center gap-2">
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>health_and_safety</span>
+          <ShieldPlus className="w-6 h-6" />
           Servicio de Salud RedNorte
         </div>
       </header>
@@ -64,7 +65,7 @@ function App() {
             {!vm.showAuthForm ? (
               <>
                 <div className="inline-flex items-center gap-2 px-sm py-xs bg-surface-container-high text-on-surface-variant rounded-full font-label-sm text-label-sm w-fit shadow-sm border border-[#E2E8F0]">
-                  <span className="material-symbols-outlined text-[16px] text-primary">verified</span>
+                  <BadgeCheck className="w-4 h-4 text-primary" />
                   Sistema de Gestión Clínica
                 </div>
                 <h1 className="font-h1 text-h1 text-on-background text-balance leading-tight">
@@ -75,7 +76,7 @@ function App() {
                     onClick={() => vm.setShowAuthForm(true)}
                     className="bg-primary text-on-primary font-label-sm text-label-sm px-md py-sm rounded-lg hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-sm border flex items-center gap-2"
                   >
-                    Portal del Paciente <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                    Portal del Paciente <ArrowRight className="w-[18px] h-[18px]" />
                   </button>
                 </div>
               </>
@@ -84,7 +85,7 @@ function App() {
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="font-h2 text-[24px] text-on-background">{vm.isLogin ? 'Iniciar Sesión' : 'Registro'}</h2>
                   <button onClick={() => vm.setShowAuthForm(false)} className="text-on-surface-variant hover:text-error transition-colors">
-                    <span className="material-symbols-outlined">close</span>
+                    <X className="w-6 h-6" />
                   </button>
                 </div>
                 
