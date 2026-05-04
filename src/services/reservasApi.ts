@@ -12,7 +12,7 @@ export const reservasApi = apiGateway.injectEndpoints({
         url: `/reservas/${id}/cancelar`,
         method: 'POST',
       }),
-      invalidatesTags: ['Reservas'], // Refresca la lista al cancelar
+      invalidatesTags: ['Reservas'], 
     }),
   }),
 });

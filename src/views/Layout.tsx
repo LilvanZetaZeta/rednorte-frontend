@@ -4,10 +4,8 @@ import { ShieldPlus, Menu, X, LogOut, Calendar, PlusCircle, CalendarCheck, FileT
 
 export default function Layout() {
   const location = useLocation();
-  // Conectamos la Vista con su ViewModel
   const vm = useLayoutVM();
 
-  // Configuración de rutas dinámicas según el rol
   const menuItems = [
     ...(vm.userRole === 'paciente' ? [
       { name: 'Mis Reservas', path: '/portal', icon: Calendar },
@@ -25,7 +23,6 @@ export default function Layout() {
 
   return (
     <div className="bg-background min-h-screen text-on-background font-body-md selection:bg-primary-container selection:text-on-primary-container">
-      
       <header className="fixed top-0 w-full z-50 h-16 bg-white/95 backdrop-blur-md border-b border-surface-variant shadow-sm flex justify-between items-center px-4 lg:px-6 transition-opacity">
         <div className="flex items-center gap-3">
           <button 
@@ -48,7 +45,6 @@ export default function Layout() {
           </div>
           <button 
             onClick={vm.handleCerrarSesion}
-            title="Cerrar Sesión"
             className="text-error hover:bg-error-container hover:text-on-error-container transition-colors p-2 rounded-full flex items-center justify-center"
           >
             <LogOut className="w-5 h-5" />
@@ -80,10 +76,7 @@ export default function Layout() {
       </aside>
 
       {vm.isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/20 z-30 lg:hidden backdrop-blur-sm"
-          onClick={vm.closeMobileMenu}
-        />
+        <div className="fixed inset-0 bg-black/20 z-30 lg:hidden backdrop-blur-sm" onClick={vm.closeMobileMenu} />
       )}
 
       <main className="pt-16 lg:ml-64 min-h-screen">
@@ -91,7 +84,6 @@ export default function Layout() {
           <Outlet /> 
         </div>
       </main>
-      
     </div>
   );
 }

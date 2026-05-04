@@ -7,29 +7,29 @@ export const useLayoutVM = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUserName(user.user_metadata?.full_name || 'Usuario');
-        setUserRole(user.user_metadata?.rol || 'paciente');
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (isMounted && session?.user) {
+        const metadata = session.user.user_metadata;
+        setUserName(metadata?.nombre_completo || metadata?.full_name || 'Usuario');
+        setUserRole(metadata?.rol?.toLowerCase() || 'paciente');
       }
     };
+
     fetchUser();
+    return () => { isMounted = false; };
   }, []);
 
   const handleCerrarSesion = async () => {
     await supabase.auth.signOut();
-    // Forzamos recarga para limpiar memoria
     window.location.href = '/'; 
   };
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false);
-  };
+  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   return {
     userName,

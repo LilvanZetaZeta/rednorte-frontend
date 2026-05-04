@@ -1,6 +1,6 @@
 import type { ICentroMedico } from '../models/ICentroMedico';
 
-// Apuntamos al Gateway
+
 const API_URL = 'http://localhost:8080/api';
 
 export const centroMedicoService = {

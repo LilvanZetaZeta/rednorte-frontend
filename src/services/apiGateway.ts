@@ -4,9 +4,8 @@ import { supabase } from '../config/supabaseClient';
 export const apiGateway = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'http://localhost:8080/api', // Apunta al API Gateway en Localhost
+    baseUrl: import.meta.env.VITE_API_GATEWAY_URL || 'http://localhost:8080/api', 
     prepareHeaders: async (headers) => {
-      // Extraemos el JWT de Supabase automáticamente en cada petición
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.access_token) {
         headers.set('Authorization', `Bearer ${session.access_token}`);
@@ -14,6 +13,6 @@ export const apiGateway = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Reservas', 'Pacientes'], // Para invalidar caché automáticamente
-  endpoints: () => ({}), // Los endpoints se inyectan en archivos separados
+  tagTypes: ['Reservas', 'Pacientes'],
+  endpoints: () => ({}),
 });
