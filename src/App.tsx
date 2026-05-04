@@ -8,7 +8,7 @@ import DashboardAdmin from './views/DashboardAdmin';
 import Layout from './views/Layout';
 
 function App() {
-  const { session, isInitializing, showAuthForm, setShowAuthForm, isLogin, setIsLogin, email, setEmail, password, setPassword, fullName, setFullName, rut, setRut, authError, isLoading, handleSubmit } = useAuthVM();
+  const { session, isInitializing, showAuthForm, setShowAuthForm, isLogin, setIsLogin, email, handleEmailChange, password, handlePasswordChange, fullName, handleFullNameChange, rut, handleRutChange, authError, isLoading, handleSubmit, fieldErrors } = useAuthVM();
 
   if (isInitializing) {
     return <div className="min-h-screen flex items-center justify-center text-primary font-h3 text-xl">Conectando con RedNorte...</div>;
@@ -49,14 +49,70 @@ function App() {
                       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                         {!isLogin && (
                           <>
-                            <input type="text" required value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Nombre Completo" className="w-full px-4 py-2 border rounded-lg" />
-                            <input type="text" required value={rut} onChange={e => setRut(e.target.value)} placeholder="RUT" className="w-full px-4 py-2 border rounded-lg" />
+                            <div>
+                              <input 
+                                type="text" 
+                                required 
+                                value={fullName} 
+                                onChange={e => handleFullNameChange(e.target.value)} 
+                                placeholder="Nombre Completo" 
+                                autoComplete="name"
+                                className={`w-full px-4 py-2 border rounded-lg ${fieldErrors.fullName ? 'border-error' : 'border-gray-300'}`}
+                              />
+                              {fieldErrors.fullName && (
+                                <p className="text-error text-sm mt-1">{fieldErrors.fullName}</p>
+                              )}
+                            </div>
+                            <div>
+                              <input 
+                                type="text" 
+                                required 
+                                value={rut} 
+                                onChange={e => handleRutChange(e.target.value)} 
+                                placeholder="RUT (ej: 12345678-9)" 
+                                autoComplete="off"
+                                className={`w-full px-4 py-2 border rounded-lg ${fieldErrors.rut ? 'border-error' : 'border-gray-300'}`}
+                              />
+                              {fieldErrors.rut && (
+                                <p className="text-error text-sm mt-1">{fieldErrors.rut}</p>
+                              )}
+                            </div>
                           </>
                         )}
-                        <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Correo" className="w-full px-4 py-2 border rounded-lg" />
-                        <input type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="Contraseña" className="w-full px-4 py-2 border rounded-lg" />
+                        <div>
+                          <input 
+                            type="email" 
+                            required 
+                            value={email} 
+                            onChange={e => handleEmailChange(e.target.value)} 
+                            placeholder="Correo" 
+                            autoComplete="email"
+                            className={`w-full px-4 py-2 border rounded-lg ${fieldErrors.email && !isLogin ? 'border-error' : 'border-gray-300'}`}
+                          />
+                          {fieldErrors.email && !isLogin && (
+                            <p className="text-error text-sm mt-1">{fieldErrors.email}</p>
+                          )}
+                        </div>
+                        <div>
+                          <input 
+                            type="password" 
+                            required 
+                            value={password} 
+                            onChange={e => handlePasswordChange(e.target.value)} 
+                            placeholder="Contraseña" 
+                            autoComplete={isLogin ? "current-password" : "new-password"}
+                            className={`w-full px-4 py-2 border rounded-lg ${fieldErrors.password && !isLogin ? 'border-error' : 'border-gray-300'}`}
+                          />
+                          {fieldErrors.password && !isLogin && (
+                            <p className="text-error text-sm mt-1">{fieldErrors.password}</p>
+                          )}
+                        </div>
                         {authError && <div className="p-3 bg-error-container text-error rounded-lg text-sm">{authError}</div>}
-                        <button type="submit" disabled={isLoading} className="w-full bg-primary text-on-primary py-3 rounded-lg disabled:opacity-50">
+                        <button 
+                          type="submit" 
+                          disabled={isLoading || (!isLogin && Object.values(fieldErrors).some(err => err !== null))} 
+                          className="w-full bg-primary text-on-primary py-3 rounded-lg disabled:opacity-50"
+                        >
                           {isLoading ? 'Procesando...' : (isLogin ? 'Acceder' : 'Registrarse')}
                         </button>
                       </form>
