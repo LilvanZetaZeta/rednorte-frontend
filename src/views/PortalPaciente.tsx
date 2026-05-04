@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { usePortalPacienteVM } from '../viewmodels/usePortalPacienteVM';
+import { Stethoscope, CalendarDays } from 'lucide-react';
 
 export default function PortalPaciente() {
   const { userName, reservas, isLoading, isError, handleCancelar } = usePortalPacienteVM();
@@ -42,7 +43,7 @@ export default function PortalPaciente() {
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
-                      <span className="material-symbols-outlined">medical_services</span>
+                      <Stethoscope className="w-6 h-6" />
                     </div>
                     <div>
                       <h3 className="font-h3 text-body-md text-on-surface">ID Médico: {reserva.medicoId}</h3>
@@ -55,7 +56,7 @@ export default function PortalPaciente() {
                 </div>
                 
                 <div className="flex items-center gap-2 text-on-surface-variant mb-5 bg-surface-container-lowest p-2 rounded border border-surface-variant">
-                  <span className="material-symbols-outlined text-[18px]">calendar_today</span>
+                  <CalendarDays className="w-5 h-5" />
                   <span className="font-body-md text-sm font-medium">{reserva.fechaHora}</span>
                 </div>
 
