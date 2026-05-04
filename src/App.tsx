@@ -140,24 +140,24 @@ function App() {
               <>
                 <div className="inline-flex items-center gap-2 px-sm py-xs bg-surface-container-high text-on-surface-variant rounded-full font-label-sm text-label-sm w-fit shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] border border-[#E2E8F0]">
                   <span className="material-symbols-outlined text-[16px] text-primary">verified</span>
-                  Clinical Management System
+                  Sistema de Gestión Clínica
                 </div>
                 <h1 className="font-h1 text-h1 text-on-background text-balance leading-tight">
                   Cuidando tu salud en el norte de Chile
                 </h1>
                 <p className="font-body-lg text-body-lg text-on-surface-variant text-pretty max-w-xl">
-                  Experience seamless healthcare with our modern, unified network. We provide efficient, human-centric digital environments for both patients and healthcare providers, reducing cognitive load and prioritizing your well-being.
+                  Experimente una atención médica sin interrupciones con nuestra red moderna y unificada. Proporcionamos entornos digitales eficientes y centrados en el ser humano tanto para pacientes como para proveedores de atención médica, reduciendo la carga cognitiva y priorizando su bienestar.
                 </p>
                 <div className="flex flex-wrap items-center gap-md pt-sm">
                   <button 
                     onClick={() => setShowAuthForm(true)}
                     className="bg-primary text-on-primary font-label-sm text-label-sm px-md py-sm rounded-lg hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] border border-[#E2E8F0] flex items-center gap-2"
                   >
-                    Patient Portal
+                    Portal del Paciente
                     <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
                   </button>
                   <button className="bg-secondary-container text-on-secondary-container font-label-sm text-label-sm px-md py-sm rounded-lg hover:bg-surface-variant transition-colors flex items-center gap-2">
-                    Institutional Login
+                    Acceso Institucional
                     <span className="material-symbols-outlined text-[18px]">login</span>
                   </button>
                 </div>
@@ -222,7 +222,7 @@ function App() {
             {/* Imagen abstracta de la clínica */}
             <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] border border-[#E2E8F0] bg-surface-container-highest">
               <img alt="Modern healthcare professional" className="w-full h-full object-cover" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdERDa2yQwAZxK6_DO-vP2lIs8S0NNWr2iyTNeGZ94w_uyhqEKSBFULh4VSQPxFfrGmzm70ZG5jh3W9JxGAyBTCAT5BpbTwThOgj_j_yH8sku8JUip0EQ9zELC3iwe-RL_9XT_xSnONULsk0H1_46KN_Rl8c_OhcSNaX4s_4Kxpye6_GnQ1QP1320QAmRfxhO36P4nm1RMUO0iDLJJaY6nF6QzatPuD-U46bnXx3TOukpkVaW6aa5Htcf8O1Sg7_Nz80MVR3Xr568"/>
+                src="https://burst.shopifycdn.com/photos/stethoscope-scrubs.jpg"/>
               
               {/* Tarjeta flotante */}
               <div className="absolute bottom-md left-md bg-white/80 backdrop-blur-md p-md rounded-xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] border border-[#E2E8F0] flex items-center gap-sm">
@@ -230,8 +230,8 @@ function App() {
                   <span className="material-symbols-outlined">favorite</span>
                 </div>
                 <div>
-                  <div className="font-label-sm text-label-sm text-on-surface-variant">Network Status</div>
-                  <div className="font-h3 text-h3 text-primary">Optimal</div>
+                  <div className="font-label-sm text-label-sm text-on-surface-variant">Estado de la Red</div>
+                  <div className="font-h3 text-h3 text-primary">Óptimo</div>
                 </div>
               </div>
             </div>
@@ -241,8 +241,8 @@ function App() {
         {/* Bento Grid (Beneficios) */}
         <section className="flex flex-col gap-lg pt-lg border-t border-surface-variant">
           <div className="flex flex-col gap-sm max-w-2xl">
-            <h2 className="font-h2 text-h2 text-on-background">Modernizing Healthcare Delivery</h2>
-            <p className="font-body-md text-body-md text-on-surface-variant">Our platform is built on principles of high-utility minimalism, ensuring critical information is easily accessible.</p>
+            <h2 className="font-h2 text-h2 text-on-background">Modernizando la Prestación de Salud</h2>
+            <p className="font-body-md text-body-md text-on-surface-variant">Nuestra plataforma está construida sobre principios de minimalismo de alta utilidad, asegurando que la información crítica sea fácilmente accesible.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
             <div className="bg-surface-container-lowest p-lg rounded-2xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] border border-[#E2E8F0] flex flex-col gap-md hover:shadow-md transition-shadow">
@@ -250,8 +250,8 @@ function App() {
                 <span className="material-symbols-outlined text-[24px]">event_repeat</span>
               </div>
               <div>
-                <h3 className="font-h3 text-h3 text-on-surface mb-xs">Automated Rescheduling</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant">Intelligent calendar management that autonomously optimizes appointment slots.</p>
+                <h3 className="font-h3 text-h3 text-on-surface mb-xs">Reprogramación Automatizada</h3>
+                <p className="font-body-md text-body-md text-on-surface-variant">Gestión inteligente de calendarios que optimiza de forma autónoma los horarios de las citas.</p>
               </div>
             </div>
             <div className="bg-surface-container-lowest p-lg rounded-2xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] border border-[#E2E8F0] flex flex-col gap-md hover:shadow-md transition-shadow">
@@ -259,8 +259,8 @@ function App() {
                 <span className="material-symbols-outlined text-[24px]">hub</span>
               </div>
               <div>
-                <h3 className="font-h3 text-h3 text-on-surface mb-xs">Unified Network</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant">A seamless, interconnected system bridging multiple facilities across the region.</p>
+                <h3 className="font-h3 text-h3 text-on-surface mb-xs">Red Unificada</h3>
+                <p className="font-body-md text-body-md text-on-surface-variant">Un sistema interconectado y sin fisuras que une múltiples instalaciones en toda la región.</p>
               </div>
             </div>
             <div className="bg-surface-container-lowest p-lg rounded-2xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] border border-[#E2E8F0] flex flex-col gap-md hover:shadow-md transition-shadow">
@@ -268,8 +268,8 @@ function App() {
                 <span className="material-symbols-outlined text-[24px]">notifications_active</span>
               </div>
               <div>
-                <h3 className="font-h3 text-h3 text-on-surface mb-xs">Real-time Alerts</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant">Instant, low-profile notifications for critical updates and lab results.</p>
+                <h3 className="font-h3 text-h3 text-on-surface mb-xs">Alertas en Tiempo Real</h3>
+                <p className="font-body-md text-body-md text-on-surface-variant">Notificaciones instantáneas y de bajo perfil para actualizaciones críticas y resultados de laboratorio.</p>
               </div>
             </div>
           </div>
@@ -284,10 +284,10 @@ function App() {
             Servicio de Salud RedNorte
           </div>
           <div className="flex gap-md font-label-sm text-label-sm text-on-surface-variant">
-            <a className="hover:text-primary transition-colors" href="#">Privacy Policy</a>
-            <a className="hover:text-primary transition-colors" href="#">Terms of Service</a>
+            <a className="hover:text-primary transition-colors" href="#">Política de Privacidad</a>
+            <a className="hover:text-primary transition-colors" href="#">Términos de Servicio</a>
           </div>
-          <div className="font-caption text-caption text-outline">© 2026 RedNorte. All rights reserved.</div>
+          <div className="font-caption text-caption text-outline">© 2026 RedNorte. Todos los derechos reservados.</div>
         </div>
       </footer>
     </div>
