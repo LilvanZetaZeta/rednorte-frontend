@@ -4,7 +4,7 @@ import { useCentrosMedicos } from '../viewmodels/useCentrosMedicos';
 export default function Reservas() {
   const { user } = useAuth0();
   
-  // ¡Llamamos al ViewModel!
+
   const { centros, isLoading, error } = useCentrosMedicos();
 
   return (

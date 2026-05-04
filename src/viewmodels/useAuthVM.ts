@@ -37,12 +37,22 @@ export const useAuthVM = () => {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) setAuthError('Credenciales incorrectas.');
     } else {
+      
       const { error } = await supabase.auth.signUp({
-        email, password, options: { data: { full_name: fullName, rut: rut, rol: 'paciente' } }
+        email, 
+        password, 
+        options: { 
+          data: { 
+            nombre_completo: fullName, 
+            rut: rut,                  
+            rol: 'PACIENTE'            
+          } 
+        }
       });
+      
       if (error) setAuthError(error.message);
       else {
-        alert('Cuenta creada. Ya puedes iniciar sesión.');
+        alert('Cuenta creada exitosamente. Ya puedes iniciar sesión.');
         setIsLogin(true);
         setPassword('');
       }
@@ -51,22 +61,8 @@ export const useAuthVM = () => {
   };
 
   return {
-    session,
-    isInitializing,
-    showAuthForm,
-    setShowAuthForm,
-    isLogin,
-    setIsLogin,
-    email,
-    setEmail,
-    password,
-    setPassword,
-    fullName,
-    setFullName,
-    rut,
-    setRut,
-    authError,
-    isLoading,
-    handleSubmit
+    session, isInitializing, showAuthForm, setShowAuthForm,
+    isLogin, setIsLogin, email, setEmail, password, setPassword,
+    fullName, setFullName, rut, setRut, authError, isLoading, handleSubmit
   };
 };

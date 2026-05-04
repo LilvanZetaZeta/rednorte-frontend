@@ -8,7 +8,7 @@ export default function PortalPaciente() {
   if (isLoading) return <div className="p-12 text-center text-primary font-h3">Cargando tu portal médico...</div>;
   if (isError) return <div className="p-12 text-center text-error">Error al conectar con los servidores de RedNorte.</div>;
 
-  // Validación defensiva estricta
+
   const tieneReservas = Array.isArray(reservas) && reservas.length > 0;
 
   return (
