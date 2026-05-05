@@ -13,6 +13,6 @@ export const apiGateway = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Reservas', 'Pacientes'],
+  tagTypes: ['Reservas', 'Pacientes', 'CentrosMedicos'],
   endpoints: () => ({}),
 });
