@@ -1,22 +1,13 @@
+import { apiGateway } from './apiGateway';
 import type { ICentroMedico } from '../models/ICentroMedico';
 
+export const centroMedicoApi = apiGateway.injectEndpoints({
+  endpoints: (builder) => ({
+    obtenerCentrosMedicos: builder.query<ICentroMedico[], void>({
+      query: () => '/centros-medicos',
+      providesTags: ['CentrosMedicos'],
+    }),
+  }),
+});
 
-const API_URL = 'http://localhost:8080/api';
-
-export const centroMedicoService = {
-  obtenerTodos: async (token: string): Promise<ICentroMedico[]> => {
-    const response = await fetch(`${API_URL}/centros-medicos`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Error del servidor: ${response.status}`);
-    }
-
-    return response.json();
-  }
-};
+export const { useObtenerCentrosMedicosQuery } = centroMedicoApi;
