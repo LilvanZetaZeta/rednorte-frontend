@@ -83,9 +83,14 @@ export const useAuthVM = () => {
     
     if (isLogin) {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) setAuthError('Credenciales incorrectas.');
+      if (error) {
+        setAuthError('Credenciales incorrectas.');
+        setIsLoading(false);
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        setIsLoading(false);
+      }
     } else {
-      
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -98,14 +103,16 @@ export const useAuthVM = () => {
         }
       });
       
-      if (error) setAuthError(error.message);
-      else {
+      if (error) {
+        setAuthError(error.message);
+        setIsLoading(false);
+      } else {
         alert('Cuenta creada exitosamente. Ya puedes iniciar sesión.');
         setIsLogin(true);
         setPassword('');
+        setIsLoading(false);
       }
     }
-    setIsLoading(false);
   };
 
   return {
