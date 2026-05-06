@@ -1,13 +1,13 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
-        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
-        VITE_GATEWAY_URL: ${VITE_GATEWAY_URL}
+    build: .
     container_name: rednorte-frontend-app
     ports:
       - "5173:5173"
     restart: unless-stopped
+    networks:
+      - network-RedNorte
+
+networks:
+  network-RedNorte:
+    external: true
