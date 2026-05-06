@@ -1,20 +1,54 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthVM } from './viewmodels/useAuthVM';
 import { ShieldPlus, BadgeCheck, ArrowRight, X } from 'lucide-react';
 import heroImage from './assets/hero.webp';
 import PortalPaciente from './views/PortalPaciente';
 import PortalDoctor from './views/PortalDoctor';
 import DashboardAdmin from './views/DashboardAdmin';
+import PortalDirector from './views/PortalDirector';
 import Layout from './views/Layout';
+import { SplashScreen } from './components/SplashScreen';
 
-function App() {
+function AppContent() {
   const { session, isInitializing, showAuthForm, setShowAuthForm, isLogin, setIsLogin, email, handleEmailChange, password, handlePasswordChange, fullName, handleFullNameChange, rut, handleRutChange, authError, isLoading, handleSubmit, fieldErrors } = useAuthVM();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const metadata = session?.user?.user_metadata || {};
+  const appMetadata = session?.user?.app_metadata || {};
+  const rawRol = metadata.rol || metadata.role || metadata.Role || appMetadata.rol || appMetadata.role || 'paciente';
+  const userRole = rawRol.toString().trim().toLowerCase();
+
+  useEffect(() => {
+    if (session && !isInitializing) {
+      
+      // Si es director y está en el portal de pacientes o en la raíz, redirigir
+      if (userRole === 'director' && (location.pathname === '/portal' || location.pathname === '/')) {
+        navigate('/director/portal', { replace: true });
+      }
+      // Si es paciente y está en el portal de director, devolver al portal
+      else if (userRole === 'paciente' && location.pathname === '/director/portal') {
+        navigate('/portal', { replace: true });
+      }
+    }
+  }, [session, userRole, isInitializing, location.pathname, navigate]);
 
   if (isInitializing) {
-    return <div className="min-h-screen flex items-center justify-center text-primary font-h3 text-xl">Conectando con RedNorte...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm font-medium text-on-surface-variant">Conectando...</p>
+        </div>
+      </div>
+    );
   }
 
-  const userRole = session?.user?.user_metadata?.rol?.toLowerCase() || 'paciente';
+  if (isLoading) {
+    return <SplashScreen />;
+  }
+
 
   return (
     <Routes>
@@ -130,7 +164,15 @@ function App() {
           </div>
         ) : (
           /* Redirección automática si ya hay sesión */
-          <Navigate to={userRole === 'admin' ? "/admin/dashboard" : userRole === 'doctor' ? "/doctor/agenda" : "/portal"} replace />
+          <Navigate 
+            to={
+              userRole === 'director' ? "/director/portal" : 
+              userRole === 'admin' ? "/admin/dashboard" : 
+              userRole === 'doctor' ? "/doctor/agenda" : 
+              "/portal"
+            } 
+            replace 
+          />
         )
       } />
 
@@ -139,6 +181,7 @@ function App() {
         <Route path="/portal" element={session ? <PortalPaciente /> : <Navigate to="/" replace />} />
         <Route path="/doctor/agenda" element={session ? <PortalDoctor /> : <Navigate to="/" replace />} />
         <Route path="/admin/dashboard" element={session ? <DashboardAdmin /> : <Navigate to="/" replace />} />
+        <Route path="/director/portal" element={session ? <PortalDirector /> : <Navigate to="/" replace />} />
       </Route>
 
       {/* CATCH ALL */}
@@ -147,4 +190,4 @@ function App() {
   );
 }
 
-export default App;
+export default AppContent;

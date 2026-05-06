@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useLayoutVM } from '../viewmodels/useLayoutVM';
-import { ShieldPlus, Menu, X, LogOut, Calendar, PlusCircle, CalendarCheck, FileText, BarChart3, UserSquare } from 'lucide-react';
+import { ShieldPlus, Menu, X, LogOut, Calendar, PlusCircle, CalendarCheck, FileText, BarChart3, UserSquare, Building2 } from 'lucide-react';
 
 export default function Layout() {
   const location = useLocation();
@@ -18,6 +18,10 @@ export default function Layout() {
     ...(vm.userRole === 'admin' ? [
       { name: 'Dashboard Central', path: '/admin/dashboard', icon: BarChart3 },
       { name: 'Gestión Personal', path: '/admin/personal', icon: UserSquare },
+    ] : []),
+    ...(vm.userRole === 'director' ? [
+      { name: 'Dashboard Ejecutivo', path: '/director/portal', icon: BarChart3 },
+      { name: 'Gestión Centros', path: '/admin/centros', icon: Building2 },
     ] : [])
   ];
 
