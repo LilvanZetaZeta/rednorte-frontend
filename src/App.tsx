@@ -13,6 +13,7 @@ import PortalDirector from './views/PortalDirector';
 import PortalSecretaria from './views/PortalSecretaria';
 import DashboardAdmin from './views/DashboardAdmin';
 import Reservas from './views/Reservas';
+import DashboardCentro from './views/DashboardCentro'; 
 
 export default function App() {
   const { session, isInitializing, isLoading } = useAuthVM();
@@ -21,14 +22,22 @@ export default function App() {
 
   const userRole = (session?.user?.user_metadata?.rol || 'paciente').toLowerCase();
 
-  // Efecto para evitar que usuarios entren a portales de otros roles
-  // (Ya no te expulsa del '/' si estás logueado)
+  // Redirección inteligente de 5 roles
   useEffect(() => {
     if (session && !isInitializing) {
-      if (userRole === 'director' && location.pathname === '/portal') {
+      const isHome = location.pathname === '/' || location.pathname === '/portal';
+      
+      if (userRole === 'director' && isHome) {
         navigate('/director/portal', { replace: true });
-      } else if (userRole === 'paciente' && location.pathname === '/director/portal') {
-        navigate('/portal', { replace: true });
+      } 
+      else if (userRole === 'administrativo' && isHome) {
+        navigate('/admin/centro', { replace: true }); // Administrativo Local
+      }
+      else if (userRole === 'secretaria' && isHome) {
+        navigate('/ops', { replace: true }); // Secretaria Operativa
+      }
+      else if (userRole === 'medico' && isHome) {
+        navigate('/doctor/agenda', { replace: true }); // Médico Clínico
       }
     }
   }, [session, userRole, isInitializing, location.pathname, navigate]);
@@ -37,23 +46,29 @@ export default function App() {
 
   return (
     <Routes>
-      {/* RUTA PÚBLICA (Ahora siempre renderiza el Home, logueado o no) */}
       <Route path="/" element={<Home />} />
       
-      {/* FLUJO TRANSACCIONAL */}
-      <Route path="/agendar" element={
-        <ProtectedRoute allowedRoles={['PACIENTE']}>
-          <Reservas />
-        </ProtectedRoute>
-      } />
+      {/* FLUJO PACIENTE */}
+      <Route path="/agendar" element={<ProtectedRoute allowedRoles={['PACIENTE']}><Reservas /></ProtectedRoute>} />
       
-      {/* RUTAS PROTEGIDAS */}
       <Route element={<Layout />}>
+        
+        {/* 1. PACIENTE */}
         <Route path="/portal" element={<ProtectedRoute allowedRoles={['PACIENTE']}><PortalPaciente /></ProtectedRoute>} />
+        
+        {/* 2. MÉDICO */}
         <Route path="/doctor/agenda" element={<ProtectedRoute allowedRoles={['MEDICO']}><PortalDoctor /></ProtectedRoute>} />
-        <Route path="/ops" element={<ProtectedRoute allowedRoles={['ADMINISTRATIVO', 'SECRETARIA']}><PortalSecretaria /></ProtectedRoute>} />
+        
+        {/* 3. SECRETARÍA */}
+        <Route path="/ops" element={<ProtectedRoute allowedRoles={['SECRETARIA']}><PortalSecretaria /></ProtectedRoute>} />
+        
+        {/* 4. ADMINISTRATIVO (Gerente Local) */}
+        <Route path="/admin/centro" element={<ProtectedRoute allowedRoles={['ADMINISTRATIVO']}><DashboardCentro /></ProtectedRoute>} />
+        
+        {/* 5. DIRECTOR (Control Global) */}
         <Route path="/director/portal" element={<ProtectedRoute allowedRoles={['DIRECTOR']}><PortalDirector /></ProtectedRoute>} />
-        <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['ADMINISTRATIVO', 'DIRECTOR']}><DashboardAdmin /></ProtectedRoute>} />
+        <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['DIRECTOR']}><DashboardAdmin /></ProtectedRoute>} />
+        
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
