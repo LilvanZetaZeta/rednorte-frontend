@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useReservasVM } from '../viewmodels/useReservasVM';
-import { ShieldPlus, ArrowLeft, Stethoscope, User, MapPin} from 'lucide-react';
+import { ShieldPlus, ArrowLeft, Stethoscope, User} from 'lucide-react';
 
 export default function Reservas() {
   const navigate = useNavigate();
