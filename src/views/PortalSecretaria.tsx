@@ -4,8 +4,6 @@ import {
   UserPlus, 
   Plus, 
   Calendar, 
-  Hourglass, 
-  ListOrdered, 
   CheckCircle,
   ChevronLeft,
   ChevronRight,

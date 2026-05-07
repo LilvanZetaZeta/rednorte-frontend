@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useLayoutVM } from '../viewmodels/useLayoutVM';
-import { ShieldPlus, Menu, X, LogOut, Calendar, PlusCircle, BarChart3 } from 'lucide-react';
+import { ShieldPlus, Menu, LogOut, Calendar, PlusCircle, BarChart3 } from 'lucide-react';
 
 export default function Layout() {
   const location = useLocation();
