@@ -1,20 +1,20 @@
 import { apiGateway } from './apiGateway';
-import type { IReserva } from '../models/Ireserva';
+import type { IReserva } from '../models/types';
 
 export const reservasApi = apiGateway.injectEndpoints({
   endpoints: (builder) => ({
     obtenerMisReservas: builder.query<IReserva[], string>({
-  query: (pacienteId) => `/reservas/paciente/${pacienteId}`,
-  providesTags: ['Reservas'],
-}),
-    cancelarReserva: builder.mutation<void, string>({
-      query: (id) => ({
-        url: `/reservas/${id}/cancelar`,
-        method: 'POST',
-      }),
-      invalidatesTags: ['Reservas'], 
+      query: (idAuth) => `/reservas/paciente/${idAuth}`,
+      providesTags: ['Reservas'],
+    }),
+    crearReserva: builder.mutation<IReserva, any>({
+      query: (body) => ({ url: '/reservas', method: 'POST', body }),
+      invalidatesTags: ['Reservas'],
+    }),
+    cancelarReserva: builder.mutation<void, number>({
+      query: (id) => ({ url: `/reservas/${id}/cancelar`, method: 'PUT' }),
+      invalidatesTags: ['Reservas'],
     }),
   }),
 });
-
-export const { useObtenerMisReservasQuery, useCancelarReservaMutation } = reservasApi;
+export const { useObtenerMisReservasQuery, useCrearReservaMutation, useCancelarReservaMutation } = reservasApi;
