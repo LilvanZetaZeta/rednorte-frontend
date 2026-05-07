@@ -12,6 +12,7 @@ import PortalDoctor from './views/PortalDoctor';
 import PortalDirector from './views/PortalDirector';
 import PortalSecretaria from './views/PortalSecretaria';
 import DashboardAdmin from './views/DashboardAdmin';
+import GestionCentros from './views/GestionCentros';
 import Reservas from './views/Reservas';
 import DashboardCentro from './views/DashboardCentro'; 
 
@@ -67,8 +68,8 @@ export default function App() {
         
         {/* 5. DIRECTOR (Control Global) */}
         <Route path="/director/portal" element={<ProtectedRoute allowedRoles={['DIRECTOR']}><PortalDirector /></ProtectedRoute>} />
-        <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['DIRECTOR']}><DashboardAdmin /></ProtectedRoute>} />
-        
+        <Route path="/director/centros" element={<ProtectedRoute allowedRoles={['DIRECTOR']}><GestionCentros /></ProtectedRoute>} />
+        <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['ADMINISTRATIVO', 'DIRECTOR']}><DashboardAdmin /></ProtectedRoute>} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

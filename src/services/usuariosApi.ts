@@ -14,11 +14,19 @@ export const usuariosApi = apiGateway.injectEndpoints({
       query: () => '/usuarios/staff',
       providesTags: ['Usuarios'],
     }),
-    updateUsuarioRol: builder.mutation<any, { id: number, rol: string }>({
+    updateUsuarioRol: builder.mutation<void, { id: number; rol: string }>({
       query: ({ id, rol }) => ({
         url: `/usuarios/${id}/rol`,
         method: 'PATCH',
         body: { rol },
+      }),
+      invalidatesTags: ['Usuarios'],
+    }),
+    updateUsuarioCentro: builder.mutation<void, { id: number; centroId: number | null }>({
+      query: ({ id, centroId }) => ({
+        url: `/usuarios/${id}/centro`,
+        method: 'PATCH',
+        body: { centroId },
       }),
       invalidatesTags: ['Usuarios'],
     }),
@@ -28,5 +36,6 @@ export const usuariosApi = apiGateway.injectEndpoints({
 export const { 
   useAsignarMedicoMutation, 
   useGetUsuariosStaffQuery, 
-  useUpdateUsuarioRolMutation 
+  useUpdateUsuarioRolMutation,
+  useUpdateUsuarioCentroMutation
 } = usuariosApi;
