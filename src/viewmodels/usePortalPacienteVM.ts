@@ -1,66 +1,28 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../config/supabaseClient';
 import { useObtenerMisReservasQuery, useCancelarReservaMutation } from '../services/reservasApi';
 
 export const usePortalPacienteVM = () => {
-  const [userName, setUserName] = useState<string>('Paciente');
-  const [userAuthId, setUserAuthId] = useState<string>(''); 
-  const { 
-    data, 
-    isLoading, 
-    isError, 
-    refetch 
-  } = useObtenerMisReservasQuery(userAuthId, {
-    skip: !userAuthId, 
-    refetchOnMountOrArgChange: true 
-  });
-
-  
-  const reservas = useMemo(() => {
-    if (!data) return [];
-    return Array.isArray(data) ? data : [];
-  }, [data]);
-
-  const [cancelarReserva] = useCancelarReservaMutation();
-
+  const [userName, setUserName] = useState('Paciente');
+  const [userId, setUserId] = useState('');
   
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (error) throw error;
-
-        if (user) {
-          
-          setUserAuthId(user.id);
-          const name = user.user_metadata?.nombre_completo || 'Paciente';
-          setUserName(name);
-        }
-      } catch (err) {
-        console.error("Error al recuperar sesión:", err);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUserId(session.user.id);
+        setUserName(session.user.user_metadata?.nombre_completo);
       }
-    };
-    fetchUser();
+    });
   }, []);
 
-  const handleCancelar = async (id: string) => {
-    if (window.confirm('¿Deseas cancelar esta reserva?')) {
-      try {
-        await cancelarReserva(id).unwrap();
-      } catch (err) {
-        console.error("Error al cancelar:", err);
-        alert("No se pudo cancelar la reserva.");
-      }
+  const { data: reservas = [], isLoading, isError } = useObtenerMisReservasQuery(userId, { skip: !userId });
+  const [cancelar] = useCancelarReservaMutation();
+
+  const handleCancelar = async (id: number) => {
+    if (window.confirm('¿Cancelar esta reserva?')) {
+      try { await cancelar(id).unwrap(); } catch { alert("Error al cancelar."); }
     }
   };
 
-  const handleCerrarSesion = async () => {
-    await supabase.auth.signOut();
-    window.location.href = '/';
-  };
-
-  return {
-    userName, reservas, isLoading, isError,
-    handleCancelar, handleCerrarSesion, refetch
-  };
+  return { userName, reservas, isLoading, isError, handleCancelar };
 };

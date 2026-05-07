@@ -7,36 +7,17 @@ export const useLayoutVM = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    let isMounted = true;
-
-    const fetchUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (isMounted && session?.user) {
-        const metadata = session.user.user_metadata;
-        setUserName(metadata?.nombre_completo || metadata?.full_name || 'Usuario');
-        setUserRole(metadata?.rol?.toLowerCase() || 'paciente');
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUserName(session.user.user_metadata?.nombre_completo || 'Usuario');
+        setUserRole(session.user.user_metadata?.rol?.toLowerCase() || 'paciente');
       }
-    };
-
-    fetchUser();
-    return () => { isMounted = false; };
+    });
   }, []);
 
-  const handleCerrarSesion = async () => {
-    await supabase.auth.signOut();
-    window.location.href = '/'; 
-  };
-
+  const handleCerrarSesion = async () => { await supabase.auth.signOut(); window.location.href = '/'; };
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
-  return {
-    userName,
-    userRole,
-    isMobileMenuOpen,
-    toggleMobileMenu,
-    closeMobileMenu,
-    handleCerrarSesion
-  };
+  return { userName, userRole, isMobileMenuOpen, toggleMobileMenu, closeMobileMenu, handleCerrarSesion };
 };

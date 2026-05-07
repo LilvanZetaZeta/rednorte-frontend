@@ -1,13 +1,9 @@
 import { apiGateway } from './apiGateway';
-import type { ICentroMedico } from '../models/ICentroMedico';
+import type { ICentroMedico } from '../models/types';
 
 export const centroMedicoApi = apiGateway.injectEndpoints({
   endpoints: (builder) => ({
-    obtenerCentrosMedicos: builder.query<ICentroMedico[], void>({
-      query: () => '/centros-medicos',
-      providesTags: ['CentrosMedicos'],
-    }),
+    obtenerCentrosMedicos: builder.query<ICentroMedico[], void>({ query: () => '/centros', providesTags: ['CentrosMedicos'] }),
   }),
 });
-
 export const { useObtenerCentrosMedicosQuery } = centroMedicoApi;

@@ -15,19 +15,13 @@ export const SplashScreen: React.FC = () => {
             RedNorte <span className="text-primary">CMS</span>
           </span>
         </div>
-
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
             <Loader2 className="w-10 h-10 text-primary animate-spin" />
             <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse" />
           </div>
-          <p className="text-sm font-medium text-on-surface-variant animate-pulse tracking-wide uppercase">
-            Preparando tu panel...
-          </p>
+          <p className="text-sm font-medium text-on-surface-variant animate-pulse tracking-wide uppercase">Preparando tu panel...</p>
         </div>
-
-        <div className="absolute -top-40 -left-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -right-40 w-80 h-80 bg-secondary/5 rounded-full blur-3xl" />
       </div>
     </div>
   );
