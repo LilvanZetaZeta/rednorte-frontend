@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useLayoutVM } from '../viewmodels/useLayoutVM';
-import { ShieldPlus, Menu, LogOut, Calendar, PlusCircle, BarChart3, Users } from 'lucide-react';
+import { ShieldPlus, Menu, LogOut, Calendar, PlusCircle, BarChart3, Users, Building2 } from 'lucide-react';
 
 export default function Layout() {
   const location = useLocation();
@@ -8,7 +8,7 @@ export default function Layout() {
 
   const menuItems = [
     ...(vm.userRole === 'paciente' ? [{ name: 'Mis Reservas', path: '/portal', icon: Calendar }, { name: 'Agendar Hora', path: '/agendar', icon: PlusCircle }] : []),
-    ...(vm.userRole === 'director' ? [{ name: 'Dashboard Ejecutivo', path: '/director/portal', icon: BarChart3 }] : []),
+    ...(vm.userRole === 'director' ? [{ name: 'Dashboard Ejecutivo', path: '/director/portal', icon: BarChart3 }, { name: 'Gestión de Centros', path: '/director/centros', icon: Building2 }] : []),
     ...(vm.userRole === 'director' || vm.userRole === 'administrativo' ? [{ name: 'Gestión de Staff', path: '/admin/dashboard', icon: Users }] : [])
   ];
 

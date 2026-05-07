@@ -5,7 +5,7 @@ import { useState } from 'react';
 const ROLES_DISPONIBLES = ['MEDICO', 'ADMINISTRATIVO', 'DIRECTOR', 'SECRETARIA'];
 
 export default function DashboardAdmin() {
-  const { staff, isLoading, isError, isDirector, handleUpdateRol, isUpdating } = useDashboardAdminVM();
+  const { staff, centros, isLoading, isError, isDirector, handleUpdateRol, handleUpdateCentro, isUpdating } = useDashboardAdminVM();
   const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
 
   const onRolChange = async (id: number, nuevoRol: string) => {
@@ -18,15 +18,26 @@ export default function DashboardAdmin() {
     setTimeout(() => setMessage(null), 3000);
   };
 
+  const onCentroChange = async (usuarioId: number, centroIdStr: string) => {
+    const centroId = centroIdStr === "" ? null : parseInt(centroIdStr);
+    const result = await handleUpdateCentro(usuarioId, centroId);
+    if (result.success) {
+      setMessage({ text: 'Centro médico asignado exitosamente', type: 'success' });
+    } else {
+      setMessage({ text: result.error || 'Error al asignar centro médico', type: 'error' });
+    }
+    setTimeout(() => setMessage(null), 3000);
+  };
+
   if (isLoading) return <div className="p-12 text-center text-primary flex flex-col items-center gap-4"><Loader2 className="w-8 h-8 animate-spin" /> Cargando personal...</div>;
   if (isError) return <div className="p-12 text-center text-error flex flex-col items-center gap-4"><AlertCircle className="w-8 h-8" /> Error al cargar el listado de personal.</div>;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 max-w-6xl mx-auto">
+    <div className="space-y-8 animate-in fade-in duration-700 max-w-7xl mx-auto">
       <section className="flex justify-between items-center">
         <div>
           <h1 className="font-h1 text-h1 text-on-background mb-1">Panel de Administración</h1>
-          <p className="text-on-surface-variant">Gestión de personal y roles del sistema</p>
+          <p className="text-on-surface-variant">Gestión de personal, roles y centros de la red</p>
         </div>
         <div className="p-3 bg-primary-container text-primary rounded-2xl shadow-sm shadow-primary/10">
           <ShieldCheck className="w-6 h-6" />
@@ -50,6 +61,7 @@ export default function DashboardAdmin() {
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Usuario</th>
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Contacto</th>
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Rol Actual</th>
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Centro Asignado</th>
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant text-right">Acciones</th>
               </tr>
             </thead>
@@ -82,6 +94,25 @@ export default function DashboardAdmin() {
                     }`}>
                       {u.rol}
                     </span>
+                  </td>
+                  <td className="px-6 py-5">
+                    {isDirector ? (
+                      <select
+                        defaultValue={u.centroMedico?.id || ""}
+                        disabled={isUpdating}
+                        onChange={(e) => onCentroChange(u.id, e.target.value)}
+                        className="bg-surface-container-high border-none text-xs font-medium rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-primary transition-all cursor-pointer disabled:opacity-50 w-full max-w-[180px]"
+                      >
+                        <option value="">Sin Centro</option>
+                        {centros?.map(c => (
+                          <option key={c.id} value={c.id}>{c.nombreSucursal}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <span className="text-sm text-on-surface-variant">
+                        {u.centroMedico?.nombreSucursal || 'Sin Centro'}
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-5 text-right">
                     {isDirector ? (
