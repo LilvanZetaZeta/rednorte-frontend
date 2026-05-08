@@ -10,8 +10,6 @@ import {
   Building2, 
   Stethoscope,
   HeartPulse,
-  PhoneCall,
-  MapPin,
   CheckCircle,
   Loader2,
   Calendar
@@ -259,57 +257,34 @@ export default function Home() {
 
       </main>
 
-      {/* FOOTER CORPORATIVO */}
-      <footer className="bg-slate-900 text-slate-300 pt-20 pb-10 mt-auto">
-        <div className="max-w-[1280px] mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+      {/* FOOTER CORPORATIVO LIMPIO */}
+      <footer className="bg-slate-900 text-slate-300 pt-20 pb-20 mt-auto">
+        <div className="max-w-[1280px] mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-2 text-white font-black text-2xl mb-6">
               <ShieldPlus className="text-sky-400" size={32} /> RedNorte
             </div>
-            <p className="text-slate-400 max-w-sm mb-8 leading-relaxed">
+            <p className="text-slate-400 max-w-sm leading-relaxed">
               Transformando la experiencia de salud en la zona norte con tecnología, empatía y profesionales de excelencia.
             </p>
-            <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-sky-500 hover:text-white cursor-pointer transition-colors">in</div>
-              <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-sky-500 hover:text-white cursor-pointer transition-colors">ig</div>
-            </div>
           </div>
           
           <div>
             <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">Pacientes</h4>
-            <ul className="space-y-4 font-medium">
+            <ul className="space-y-4 font-medium text-sm">
               <li><a href="#" className="hover:text-white transition-colors">Portal del Paciente</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Agendar Hora</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Especialidades</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Preparación de Exámenes</a></li>
             </ul>
           </div>
           
           <div>
-            <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">Contacto</h4>
-            <ul className="space-y-4 font-medium">
-              <li className="flex items-start gap-3">
-                <MapPin className="shrink-0 mt-0.5 text-sky-400" size={18} />
-                <span>Av. Los Pajaritos 1234, Maipú, Región Metropolitana</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <PhoneCall className="shrink-0 text-sky-400" size={18} />
-                <span>Mesa Central: 600 123 4567</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <Activity className="shrink-0 text-red-400" size={18} />
-                <span className="text-red-400 font-bold">Urgencias: *999</span>
-              </li>
-            </ul>
+            <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">Emergencias</h4>
+            <div className="flex items-center gap-3 text-red-400 font-bold">
+              <Activity size={20} />
+              <span>Urgencias: 131</span>
+            </div>
           </div>
-        </div>
-        
-        <div className="max-w-[1280px] mx-auto px-6 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-sm font-medium">
-          <div className="flex gap-6">
-            <a href="#" className="hover:text-white transition-colors">Política de Privacidad</a>
-            <a href="#" className="hover:text-white transition-colors">Términos de Servicio</a>
-          </div>
-          <p>© 2026 Servicio de Salud RedNorte. Todos los derechos reservados.</p>
         </div>
       </footer>
     </div>
