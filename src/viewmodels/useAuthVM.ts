@@ -56,6 +56,15 @@ export const useAuthVM = () => {
     }, 3000);
   };
 
+  const translateError = (message: string): string => {
+    if (message.includes('User already registered')) return 'Este correo ya se encuentra registrado.';
+    if (message.includes('Invalid login credentials')) return 'Credenciales incorrectas. Inténtalo de nuevo.';
+    if (message.includes('Email rate limit exceeded')) return 'Has superado el límite de intentos. Inténtalo más tarde.';
+    if (message.includes('Signup disabled')) return 'El registro está deshabilitado temporalmente.';
+    if (message.includes('Database error saving new user')) return 'Este RUT ya se encuentra registrado o hubo un error en los datos.';
+    return message;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); 
     setAuthError('');
@@ -91,7 +100,7 @@ export const useAuthVM = () => {
         options: { data: { nombre_completo: fullName, rut, rol: 'PACIENTE' } } 
       });
       if (error) {
-        setAuthError(error.message);
+        setAuthError(translateError(error.message));
         setIsLoading(false);
       } else { 
         setIsLoading(false);
