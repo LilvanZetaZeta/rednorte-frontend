@@ -11,7 +11,6 @@ export const reservasApi = apiGateway.injectEndpoints({
       query: (centroId) => `/reservas/centro/${centroId}`,
       providesTags: ['Reservas'],
     }),
-    // NUEVO: Obtener la agenda del médico
     obtenerReservasPorMedico: builder.query<IReserva[], string>({
       query: (idAuth) => `/reservas/medico/${idAuth}`,
       providesTags: ['Reservas'],
@@ -24,14 +23,13 @@ export const reservasApi = apiGateway.injectEndpoints({
       query: (id) => ({ url: `/reservas/${id}/cancelar`, method: 'PUT' }),
       invalidatesTags: ['Reservas'],
     }),
-    // NUEVO: Cambiar el estado de la reserva (Ej: a ATENDIDO)
     actualizarEstadoReserva: builder.mutation<void, { id: number, estado: string }>({
       query: ({ id, estado }) => ({ 
-        url: `/reservas/${id}/estado`, 
-        method: 'PUT',
-        params: { estado } // Asumiendo que el backend recibe un query param o ajustarlo a body si es necesario
-      }),
-      invalidatesTags: ['Reservas'],
+        url: `/reservas/${id}`,
+        method: 'PATCH',
+        body: { estado }
+    }),
+    invalidatesTags: ['Reservas'],
     }),
   }),
 });
