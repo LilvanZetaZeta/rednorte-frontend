@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../config/supabaseClient';
 import type { Session } from '@supabase/supabase-js';
-import { validations, validateLogin, validateRegistration } from '../utils/validations';
+import { validations, validateRegistration } from '../utils/validations';
 
 export const useAuthVM = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -14,10 +14,9 @@ export const useAuthVM = () => {
   const [rut, setRut] = useState('');
   const [authError, setAuthError] = useState('');
   
-  // Estados para el flujo visual del modal y el popup
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [successMessage, setSuccessMessage] = useState(''); // <-- AQUÍ DEFINIMOS successMessage
+  const [successMessage, setSuccessMessage] = useState('');
 
   const [fieldErrors, setFieldErrors] = useState<any>({ email: null, password: null, fullName: null, rut: null });
 
@@ -50,12 +49,11 @@ export const useAuthVM = () => {
     setFieldErrors({ ...fieldErrors, rut: validations.rut(v) }); 
   };
 
-  // Función para manejar el popup flotante
   const triggerSuccessPopup = (msg: string) => {
     setSuccessMessage(msg);
     setTimeout(() => {
       setSuccessMessage('');
-    }, 3000); // El popup desaparece después de 3 segundos
+    }, 3000);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -63,9 +61,12 @@ export const useAuthVM = () => {
     setAuthError('');
     
     if (isLogin) {
-      if (Object.values(validateLogin({ email, password })).some(err => err !== null)) return;
+      // Para login no mostramos errores de campo, solo procedemos
+      setFieldErrors({ email: null, password: null, fullName: null, rut: null });
     } else {
-      if (Object.values(validateRegistration({ fullName, email, rut, password })).some(err => err !== null)) return;
+      const errors = validateRegistration({ fullName, email, rut, password });
+      setFieldErrors(errors);
+      if (Object.values(errors).some(err => err !== null)) return;
     }
     
     setIsLoading(true);
@@ -78,11 +79,10 @@ export const useAuthVM = () => {
       } else {
         setIsLoading(false);
         setIsSuccess(true);
-        // Esperamos 2 segundos para la animación del modal
         await new Promise(r => setTimeout(r, 2000));
         setShowAuthForm(false);
         setIsSuccess(false);
-        triggerSuccessPopup('¡Inicio de sesión exitoso!'); // <-- DISPARAMOS EL POPUP
+        triggerSuccessPopup('¡Inicio de sesión exitoso!');
       }
     } else {
       const { error } = await supabase.auth.signUp({ 

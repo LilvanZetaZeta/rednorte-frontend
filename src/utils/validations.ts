@@ -1,5 +1,3 @@
-// Validaciones estándar para formularios seguros
-
 export const validations = {
   email: (value: string): string | null => {
     if (!value) return null;
@@ -33,7 +31,6 @@ export const validations = {
   rut: (value: string): string | null => {
     if (!value) return null;
     
-    // Formato: debe ser números, guion, y un dígito verificador (número o K)
     if (!/^[0-9]+-[0-9kK]{1}$/.test(value)) {
       return 'El RUT debe tener formato: números-dígito verificador (ej: 12345678-9 o 12345678-K)';
     }
@@ -42,7 +39,6 @@ export const validations = {
     const rutNumber = parts[0];
     const verifier = parts[1].toLowerCase();
     
-    // Calcular el dígito verificador correcto
     const expectedVerifier = calculateRutVerifier(rutNumber);
     
     if (verifier !== expectedVerifier) {
@@ -95,7 +91,7 @@ export const validateLogin = (data: {
   password: string;
 }): Record<string, string | null> => {
   return {
-    email: null,
-    password: data.password ? null : 'La contraseña es requerida',
+    email: validations.email(data.email) || (!data.email ? 'El correo es requerido' : null),
+    password: validations.password(data.password) || (!data.password ? 'La contraseña es requerida' : null),
   };
 };

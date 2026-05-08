@@ -97,12 +97,25 @@ export default function Home() {
                 <form onSubmit={vm.handleSubmit} className="flex flex-col gap-4">
                   {!vm.isLogin && (
                     <div className="flex flex-col gap-4 animate-in slide-in-from-right-4">
-                      <input type="text" required value={vm.fullName} onChange={e => vm.handleFullNameChange(e.target.value)} placeholder="Nombre Completo" className={`w-full px-4 py-4 border rounded-xl bg-slate-50 font-medium ${vm.fieldErrors.fullName ? 'border-red-500' : 'border-slate-200'} outline-none focus:border-[#00507d]`} />
-                      <input type="text" required value={vm.rut} onChange={e => vm.handleRutChange(e.target.value)} placeholder="RUT (ej: 12345678-9)" className={`w-full px-4 py-4 border rounded-xl bg-slate-50 font-medium ${vm.fieldErrors.rut ? 'border-red-500' : 'border-slate-200'} outline-none focus:border-[#00507d]`} />
+                      <div className="flex flex-col gap-1">
+                        <input type="text" required value={vm.fullName} onChange={e => vm.handleFullNameChange(e.target.value)} placeholder="Nombre Completo" className={`w-full px-4 py-4 border rounded-xl bg-slate-50 font-medium ${vm.fieldErrors.fullName ? 'border-red-500' : 'border-slate-200'} outline-none focus:border-[#00507d]`} />
+                        {vm.fieldErrors.fullName && <span className="text-red-500 text-xs font-bold px-2">{vm.fieldErrors.fullName}</span>}
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <input type="text" required value={vm.rut} onChange={e => vm.handleRutChange(e.target.value)} placeholder="RUT (ej: 12345678-9)" className={`w-full px-4 py-4 border rounded-xl bg-slate-50 font-medium ${vm.fieldErrors.rut ? 'border-red-500' : 'border-slate-200'} outline-none focus:border-[#00507d]`} />
+                        {vm.fieldErrors.rut && <span className="text-red-500 text-xs font-bold px-2">{vm.fieldErrors.rut}</span>}
+                      </div>
                     </div>
                   )}
-                  <input type="email" required value={vm.email} onChange={e => vm.handleEmailChange(e.target.value)} placeholder="Correo Electrónico" className="w-full px-4 py-4 border border-slate-200 rounded-xl bg-slate-50 font-medium outline-none focus:border-[#00507d]" />
-                  <input type="password" required value={vm.password} onChange={e => vm.handlePasswordChange(e.target.value)} placeholder="Contraseña" className="w-full px-4 py-4 border border-slate-200 rounded-xl bg-slate-50 font-medium outline-none focus:border-[#00507d]" />
+                  <div className="flex flex-col gap-1">
+                    <input type="email" required value={vm.email} onChange={e => vm.handleEmailChange(e.target.value)} placeholder="Correo Electrónico" className={`w-full px-4 py-4 border rounded-xl bg-slate-50 font-medium ${!vm.isLogin && vm.fieldErrors.email ? 'border-red-500' : 'border-slate-200'} outline-none focus:border-[#00507d]`} />
+                    {!vm.isLogin && vm.fieldErrors.email && <span className="text-red-500 text-xs font-bold px-2">{vm.fieldErrors.email}</span>}
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <input type="password" required value={vm.password} onChange={e => vm.handlePasswordChange(e.target.value)} placeholder="Contraseña" className={`w-full px-4 py-4 border rounded-xl bg-slate-50 font-medium ${!vm.isLogin && vm.fieldErrors.password ? 'border-red-500' : 'border-slate-200'} outline-none focus:border-[#00507d]`} />
+                    {!vm.isLogin && vm.fieldErrors.password && <span className="text-red-500 text-xs font-bold px-2">{vm.fieldErrors.password}</span>}
+                  </div>
                   
                   {vm.authError && <div className="p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm font-bold flex items-center gap-2"><ShieldPlus className="shrink-0"/> {vm.authError}</div>}
                   
