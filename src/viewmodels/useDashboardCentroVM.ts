@@ -1,12 +1,23 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '../config/supabaseClient';
 import { useGetResumenQuery } from '../services/metricasApi';
 import { useObtenerReservasPorCentroQuery } from '../services/reservasApi';
 
 export const useDashboardCentroVM = () => {
-  // Asumimos que este administrador está asignado al Centro ID: 1 (Podrías hacerlo dinámico leyendo su perfil)
-  const miCentroId = 1; 
+  const [miCentroId, setMiCentroId] = useState<number | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const centroId = session?.user?.user_metadata?.centro_id;
+      if (centroId) setMiCentroId(Number(centroId));
+    });
+  }, []);
 
   const { data: resumen, isLoading: loadingMetricas } = useGetResumenQuery();
-  const { data: agendaCentro, isLoading: loadingAgenda } = useObtenerReservasPorCentroQuery(miCentroId);
+  const { data: agendaCentro, isLoading: loadingAgenda } = useObtenerReservasPorCentroQuery(
+    miCentroId!, 
+    { skip: !miCentroId } 
+  );
 
   // Calculamos métricas exclusivas de este centro basadas en sus reservas reales
   const reservasCanceladas = agendaCentro?.filter(r => r.estado === 'CANCELADA').length || 0;

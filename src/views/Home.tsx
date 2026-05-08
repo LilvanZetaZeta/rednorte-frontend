@@ -212,7 +212,7 @@ export default function Home() {
             </div>
             <div className="text-center px-4">
               <div className="flex justify-center text-[#00507d] mb-4"><Building2 size={32} /></div>
-              <p className="text-4xl font-black text-slate-900 mb-1">8</p>
+              <p className="text-4xl font-black text-slate-900 mb-1">16</p>
               <p className="text-sm font-medium text-slate-500">Centros Médicos</p>
             </div>
             <div className="text-center px-4">
