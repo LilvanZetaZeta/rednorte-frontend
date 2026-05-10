@@ -23,7 +23,6 @@ export default function App() {
 
   const userRole = (session?.user?.user_metadata?.rol || 'paciente').toLowerCase();
 
-  // Redirección inteligente de 5 roles
   useEffect(() => {
     if (session && !isInitializing) {
       const isHome = location.pathname === '/' || location.pathname === '/portal';

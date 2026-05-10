@@ -11,7 +11,7 @@ interface ProtectedRouteProps {
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
   const { session, isInitializing } = useAuthVM();
 
-  // Mientras Supabase verifica la sesión, no renderizamos nada (o podrías poner el SplashScreen aquí)
+  // Mientras Supabase verifica la sesión, no renderizamos nada
   if (isInitializing) return null;
 
   // Si no hay sesión activa, expulsamos al Home

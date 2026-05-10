@@ -5,7 +5,6 @@ import { useGetResumenQuery } from '../services/metricasApi';
 export const useSecretariaVM = () => {
   const [rutBusqueda, setRutBusqueda] = useState('');
   
-  // Obtenemos métricas generales para los contadores superiores
   const { data: resumen, isLoading: loadingMetricas } = useGetResumenQuery();
 
   // Por ahora usaremos las métricas del resumen
