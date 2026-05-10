@@ -11,7 +11,7 @@ export const apiGateway = createApi({
       return headers;
     },
   }),
-  // Añadimos 'ListaEspera' al final de los tags
+
   tagTypes: ['Reservas', 'Pacientes', 'CentrosMedicos', 'Especialidades', 'Usuarios', 'ListaEspera'],
   endpoints: () => ({}),
 });

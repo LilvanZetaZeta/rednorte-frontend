@@ -70,7 +70,6 @@ export const useAuthVM = () => {
     setAuthError('');
     
     if (isLogin) {
-      // Para login no mostramos errores de campo, solo procedemos
       setFieldErrors({ email: null, password: null, fullName: null, rut: null });
     } else {
       const errors = validateRegistration({ fullName, email, rut, password });
@@ -122,7 +121,7 @@ export const useAuthVM = () => {
     session, isInitializing, showAuthForm, setShowAuthForm, 
     isLogin, setIsLogin, email, handleEmailChange, password, 
     handlePasswordChange, fullName, handleFullNameChange, rut, 
-    handleRutChange, authError, isLoading, isSuccess, successMessage, handleSubmit, fieldErrors, // <-- AQUÍ EXPORTAMOS successMessage
+    handleRutChange, authError, isLoading, isSuccess, successMessage, handleSubmit, fieldErrors,
     handleLogout 
   };
 };

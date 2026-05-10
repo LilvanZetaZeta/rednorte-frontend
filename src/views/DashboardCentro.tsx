@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Building2, Activity, UserPlus, Users, Loader2 } from 'lucide-react';
 
 export default function DashboardCentro() {
-  // Aquí debes traer los centros que tiene asignados este administrativo desde tu ViewModel
   const misCentros = [{ id: 1, nombre: "Sucursal Central" }]; 
   
   const [nuevoStaff, setNuevoStaff] = useState({ nombre: '', correo: '', rol: 'SECRETARIA', centroId: misCentros[0].id });
@@ -11,7 +10,6 @@ export default function DashboardCentro() {
   const handleCrearStaffLocal = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsCreating(true);
-    // Aquí llamas a tu mutación: POST /api/usuarios enviando el objeto nuevoStaff
     setTimeout(() => {
       alert(`Usuario ${nuevoStaff.nombre} creado y asignado al centro exitosamente.`);
       setNuevoStaff({ nombre: '', correo: '', rol: 'SECRETARIA', centroId: misCentros[0].id });

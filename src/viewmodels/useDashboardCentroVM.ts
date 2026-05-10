@@ -19,7 +19,6 @@ export const useDashboardCentroVM = () => {
     { skip: !miCentroId } 
   );
 
-  // Calculamos métricas exclusivas de este centro basadas en sus reservas reales
   const reservasCanceladas = agendaCentro?.filter(r => r.estado === 'CANCELADA').length || 0;
   const reservasAtendidas = agendaCentro?.filter(r => r.estado === 'ATENDIDO').length || 0;
   const pacientesTotales = agendaCentro?.length || 0;
