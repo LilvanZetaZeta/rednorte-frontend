@@ -30,6 +30,14 @@ export const usuariosApi = apiGateway.injectEndpoints({
       }),
       invalidatesTags: ['Usuarios'],
     }),
+    updateUsuarioEspecialidades: builder.mutation<void, { id: number; especialidadIds: number[] }>({
+      query: ({ id, especialidadIds }) => ({
+        url: `/usuarios/${id}/especialidades`,
+        method: 'PATCH',
+        body: especialidadIds,
+      }),
+      invalidatesTags: ['Usuarios'],
+    }),
   }),
 });
 
@@ -37,5 +45,6 @@ export const {
   useAsignarMedicoMutation, 
   useGetUsuariosStaffQuery, 
   useUpdateUsuarioRolMutation,
-  useUpdateUsuarioCentroMutation
+  useUpdateUsuarioCentroMutation,
+  useUpdateUsuarioEspecialidadesMutation
 } = usuariosApi;
