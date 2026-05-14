@@ -45,7 +45,7 @@ export const usePortalPacienteVM = () => {
       if (perfil) {
         await actualizarPerfil({ id: perfil.id, data }).unwrap();
       } else {
-        await crearPerfil(data).unwrap();
+        await crearPerfil({ ...data, idAuth: userId }).unwrap();
       }
       return { success: true };
     } catch {

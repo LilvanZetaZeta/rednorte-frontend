@@ -3,6 +3,7 @@ import { apiGateway } from './apiGateway';
 export interface PerfilPaciente {
   id: number;
   pacienteId: number;
+  idAuth?: string;
   prevision: string | null;
   telefonoContacto: string | null;
 }
