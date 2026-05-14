@@ -37,6 +37,10 @@ export const centrosMedicosApi = apiGateway.injectEndpoints({
       }),
       invalidatesTags: ['CentrosMedicos'],
     }),
+    getEspecialidadesPorCentro: builder.query<any[], number>({
+      query: (id) => `/centros-medicos/${id}/especialidades`,
+      providesTags: ['Especialidades'],
+    }),
   }),
 });
 
@@ -45,4 +49,6 @@ export const {
   useCreateCentroMutation,
   useUpdateCentroMutation,
   useDeleteCentroMutation,
+  useGetEspecialidadesPorCentroQuery,
+  useLazyGetEspecialidadesPorCentroQuery,
 } = centrosMedicosApi;
