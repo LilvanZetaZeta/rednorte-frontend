@@ -131,10 +131,12 @@ export default function PortalPaciente() {
                   <CalendarDays className="w-5 h-5" />
                   <span className="text-sm font-medium">{res.fechaHora}</span>
                 </div>
-                <button onClick={() => handleCancelar(res.id)}
-                  className="w-full bg-error/10 text-error py-2.5 rounded-lg text-sm hover:bg-error hover:text-white transition-colors">
-                  Cancelar Cita
-                </button>
+                {res.estado !== 'CANCELADA' && (
+                  <button onClick={() => handleCancelar(res.id)}
+                    className="w-full bg-error/10 text-error py-2.5 rounded-lg text-sm hover:bg-error hover:text-white transition-colors">
+                    Cancelar Cita
+                  </button>
+                )}
               </div>
             ))
           )}

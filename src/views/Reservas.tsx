@@ -41,37 +41,30 @@ export default function Reservas() {
             </div>
           </div>
 
-          {/* PASO 2: ESPECIALIDAD (Solo si hay centro seleccionado) */}
+          {/* PASO 2: ESPECIALIDAD */}
           {vm.centroSelec && (
             <div className="bg-surface-container-lowest rounded-[32px] p-8 border border-outline-variant shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">
               <h2 className="text-2xl font-bold mb-6 flex items-center gap-3"><Stethoscope className="text-primary" /> 2. Selecciona una Especialidad</h2>
-              {vm.loadEsp ? (
-                <p className="text-center py-8">Cargando especialidades...</p>
-              ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {vm.especialidades?.map(esp => (
-                    <div 
-                      key={esp.id} 
-                      onClick={() => vm.setEspSelec(esp)} 
-                      className={`p-5 rounded-2xl cursor-pointer border-2 transition-all flex items-center gap-3 ${
-                        vm.espSelec?.id === esp.id 
-                          ? 'border-primary bg-primary-container/20 ring-1 ring-primary' 
-                          : 'border-outline-variant hover:border-primary/50 bg-surface-container-low'
-                      }`}
-                    >
-                      <Stethoscope className="w-5 h-5 text-primary" />
-                      <span className="font-bold">{esp.nombre}</span>
-                    </div>
-                  ))}
-                  {vm.especialidades?.length === 0 && (
-                    <p className="col-span-full text-center text-on-surface-variant py-4">No hay especialidades disponibles en este centro.</p>
-                  )}
-                </div>
-              )}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {vm.especialidades?.map(esp => (
+                  <div 
+                    key={esp.id} 
+                    onClick={() => vm.setEspSelec(esp)} 
+                    className={`p-5 rounded-2xl cursor-pointer border-2 transition-all flex items-center gap-3 ${
+                      vm.espSelec?.id === esp.id 
+                        ? 'border-primary bg-primary-container/20 ring-1 ring-primary' 
+                        : 'border-outline-variant hover:border-primary/50 bg-surface-container-low'
+                    }`}
+                  >
+                    <Stethoscope className="w-5 h-5 text-primary" />
+                    <span className="font-bold">{esp.nombre}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
-          {/* PASO 3: MÉDICO (Solo si hay especialidad seleccionada) */}
+          {/* PASO 3: MÉDICO */}
           {vm.espSelec && (
             <div className="bg-surface-container-lowest rounded-[32px] p-8 border border-outline-variant shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">
               <h2 className="text-2xl font-bold mb-6 flex items-center gap-3"><User className="text-primary" /> 3. Selecciona un Médico</h2>
@@ -113,6 +106,12 @@ export default function Reservas() {
                   onChange={e => vm.setFechaHora(e.target.value)} 
                   className="w-full p-4 rounded-2xl bg-surface-container-high border-none text-on-surface focus:ring-2 focus:ring-primary outline-none text-lg" 
                 />
+                
+                {vm.error && (
+                  <div className="p-4 rounded-2xl bg-error-container/20 border border-error text-error text-center font-medium animate-in fade-in slide-in-from-top-2">
+                    {vm.error}
+                  </div>
+                )}
                 
                 <button 
                   onClick={vm.confirmarReserva} 
