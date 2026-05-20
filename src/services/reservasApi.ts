@@ -28,8 +28,17 @@ export const reservasApi = apiGateway.injectEndpoints({
         url: `/reservas/${id}`,
         method: 'PATCH',
         body: { estado }
+      }),
+      invalidatesTags: ['Reservas'],
     }),
-    invalidatesTags: ['Reservas'],
+    // NUEVA MUTACIÓN INTEGRADA A RTK QUERY
+    bloquearAgendaMedico: builder.mutation<void, { medicoId: number, fechaBloqueo: string }>({
+      query: (body) => ({ 
+        url: '/reasignaciones/agenda/bloquear', 
+        method: 'POST', 
+        body 
+      }),
+      invalidatesTags: ['Reservas'],
     }),
   }),
 });
@@ -40,5 +49,6 @@ export const {
   useObtenerReservasPorMedicoQuery, 
   useCrearReservaMutation, 
   useCancelarReservaMutation,
-  useActualizarEstadoReservaMutation
+  useActualizarEstadoReservaMutation,
+  useBloquearAgendaMedicoMutation
 } = reservasApi;
