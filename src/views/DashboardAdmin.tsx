@@ -6,32 +6,21 @@ import SpecialtiesModal from '../components/dashboard/SpecialtiesModal';
 import type { IUsuario } from '../models/types';
 
 export default function DashboardAdmin() {
-  const { 
-    staff, 
-    centros, 
-    especialidades, 
-    isLoading, 
-    isError, 
-    isDirector, 
-    handleUpdateRol, 
-    handleUpdateCentro, 
+  const {
+    staff,
+    centros,
+    especialidades,
+    isLoading,
+    isError,
+    isDirector,
+    handleUpdateCentro,
     handleUpdateEspecialidades,
-    isUpdating 
+    isUpdating
   } = useDashboardAdminVM();
-  
+
   const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
   const [editingDoctor, setEditingDoctor] = useState<IUsuario | null>(null);
   const [selectedEspIds, setSelectedEspIds] = useState<number[]>([]);
-
-  const onRolChange = async (id: number, nuevoRol: string) => {
-    const result = await handleUpdateRol(id, nuevoRol);
-    if (result.success) {
-      setMessage({ text: 'Rol actualizado exitosamente', type: 'success' });
-    } else {
-      setMessage({ text: result.error || 'Error al actualizar rol', type: 'error' });
-    }
-    setTimeout(() => setMessage(null), 3000);
-  };
 
   const onCentroChange = async (usuarioId: number, centroIdStr: string) => {
     const centroId = centroIdStr === "" ? null : parseInt(centroIdStr);
@@ -62,7 +51,7 @@ export default function DashboardAdmin() {
   };
 
   const toggleEspSelection = (id: number) => {
-    setSelectedEspIds(prev => 
+    setSelectedEspIds(prev =>
       prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
     );
   };
@@ -83,9 +72,8 @@ export default function DashboardAdmin() {
       </section>
 
       {message && (
-        <div className={`fixed top-20 right-8 z-50 flex items-center gap-3 p-4 rounded-2xl animate-in slide-in-from-right-4 duration-300 shadow-xl border ${
-          message.type === 'success' ? 'bg-success-container text-success border-success/20' : 'bg-error-container text-error border-error/20'
-        }`}>
+        <div className={`fixed top-20 right-8 z-50 flex items-center gap-3 p-4 rounded-2xl animate-in slide-in-from-right-4 duration-300 shadow-xl border ${message.type === 'success' ? 'bg-success-container text-success border-success/20' : 'bg-error-container text-error border-error/20'
+          }`}>
           {message.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
           <p className="text-sm font-bold">{message.text}</p>
         </div>
@@ -94,10 +82,9 @@ export default function DashboardAdmin() {
       <StaffTable
         staff={staff}
         centros={centros}
-        isDirector={isDirector}
+        isDirector={!isDirector}
         isUpdating={isUpdating}
         onCentroChange={onCentroChange}
-        onRolChange={onRolChange}
         onOpenEspModal={openEspModal}
       />
 

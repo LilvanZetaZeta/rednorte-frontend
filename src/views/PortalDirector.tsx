@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { usePortalDirectorVM } from '../viewmodels/usePortalDirectorVM';
-import { BarChart3, Users, Building2, CalendarCheck2, Activity, UserPlus, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { BarChart3, Users, Building2, CalendarCheck2, Activity, CheckCircle2, AlertCircle, Loader2, ShieldCheck } from 'lucide-react';
 
 export default function PortalDirector() {
-  const { userName, resumen, centros, isLoading, handleAsignarMedico, isAssigning } = usePortalDirectorVM();
+  const { userName, resumen, centros, isLoading, handleAsignarAdmin, isAssigning } = usePortalDirectorVM();
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
 
@@ -11,12 +11,12 @@ export default function PortalDirector() {
     e.preventDefault();
     if (!email) return;
 
-    const result = await handleAsignarMedico(email);
+    const result = await handleAsignarAdmin(email);
     if (result.success) {
-      setMessage({ text: 'Usuario designado como Médico exitosamente.', type: 'success' });
+      setMessage({ text: 'Usuario designado como Administrador exitosamente.', type: 'success' });
       setEmail('');
     } else {
-      setMessage({ text: result.error || 'Error al asignar médico', type: 'error' });
+      setMessage({ text: result.error || 'Error al asignar administrador', type: 'error' });
     }
     
     setTimeout(() => setMessage(null), 5000);
@@ -55,8 +55,8 @@ export default function PortalDirector() {
         </section>
 
         <section className="bg-surface-container-lowest p-8 rounded-3xl border border-outline-variant shadow-sm flex flex-col">
-          <h2 className="font-h3 text-h3 mb-6 flex items-center gap-3"><UserPlus className="text-primary" /> Gestión de Personal</h2>
-          <p className="text-on-surface-variant mb-8 text-sm">Designa a usuarios existentes como Médicos de la red ingresando su correo electrónico registrado.</p>
+          <h2 className="font-h3 text-h3 mb-6 flex items-center gap-3"><ShieldCheck className="text-primary" /> Crear Administrador</h2>
+          <p className="text-on-surface-variant mb-8 text-sm">Designa a usuarios existentes como Administradores de la red ingresando su correo electrónico registrado.</p>
           
           <form onSubmit={onAssign} className="space-y-6 mt-auto">
             <div className="space-y-2">
@@ -77,8 +77,8 @@ export default function PortalDirector() {
               disabled={isAssigning || !email}
               className="w-full py-4 bg-primary text-on-primary rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-primary/20"
             >
-              {isAssigning ? <Loader2 className="w-5 h-5 animate-spin" /> : <UserPlus className="w-5 h-5" />}
-              {isAssigning ? 'Procesando...' : 'Designar como Médico'}
+              {isAssigning ? <Loader2 className="w-5 h-5 animate-spin" /> : <ShieldCheck className="w-5 h-5" />}
+              {isAssigning ? 'Procesando...' : 'Designar como Administrador'}
             </button>
 
             {message && (
