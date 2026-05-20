@@ -1,4 +1,5 @@
 import { apiGateway } from './apiGateway';
+import type { IUsuario } from '../models/types';
 
 export const usuariosApi = apiGateway.injectEndpoints({
   endpoints: (builder) => ({
@@ -18,7 +19,7 @@ export const usuariosApi = apiGateway.injectEndpoints({
       }),
       invalidatesTags: ['Usuarios'],
     }),
-    getUsuariosStaff: builder.query<any[], void>({
+    getUsuariosStaff: builder.query<IUsuario[], void>({
       query: () => '/usuarios/staff',
       providesTags: ['Usuarios'],
     }),
@@ -46,7 +47,7 @@ export const usuariosApi = apiGateway.injectEndpoints({
       }),
       invalidatesTags: ['Usuarios'],
     }),
-    getAdminsDisponibles: builder.query<any[], void>({
+    getAdminsDisponibles: builder.query<IUsuario[], void>({
       query: () => '/usuarios/admins-disponibles',
       providesTags: ['Usuarios'],
     }),
