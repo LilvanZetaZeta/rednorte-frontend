@@ -8,7 +8,6 @@ interface StaffTableProps {
   isDirector: boolean;
   isUpdating: boolean;
   onCentroChange: (usuarioId: number, centroIdStr: string) => Promise<void>;
-  onRolChange: (usuarioId: number, nuevoRol: string) => Promise<void>;
   onOpenEspModal: (usuario: IUsuario) => void;
 }
 
@@ -18,7 +17,6 @@ export default function StaffTable({
   isDirector,
   isUpdating,
   onCentroChange,
-  onRolChange,
   onOpenEspModal
 }: StaffTableProps) {
   return (
@@ -31,7 +29,6 @@ export default function StaffTable({
               <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Rol</th>
               <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Centro Médico</th>
               <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Especialidades</th>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant text-right">Ajustes Rol</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-outline-variant">
@@ -43,7 +40,6 @@ export default function StaffTable({
                 isDirector={isDirector}
                 isUpdating={isUpdating}
                 onCentroChange={onCentroChange}
-                onRolChange={onRolChange}
                 onOpenEspModal={onOpenEspModal}
               />
             ))}

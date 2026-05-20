@@ -10,6 +10,14 @@ export const usuariosApi = apiGateway.injectEndpoints({
       }),
       invalidatesTags: ['Usuarios'],
     }),
+    asignarAdmin: builder.mutation<any, { correo: string }>({
+      query: (body) => ({
+        url: '/usuarios/asignar-admin',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Usuarios'],
+    }),
     getUsuariosStaff: builder.query<any[], void>({
       query: () => '/usuarios/staff',
       providesTags: ['Usuarios'],
@@ -38,13 +46,20 @@ export const usuariosApi = apiGateway.injectEndpoints({
       }),
       invalidatesTags: ['Usuarios'],
     }),
+    getAdminsDisponibles: builder.query<any[], void>({
+      query: () => '/usuarios/admins-disponibles',
+      providesTags: ['Usuarios'],
+    }),
   }),
 });
 
 export const { 
-  useAsignarMedicoMutation, 
+  useAsignarMedicoMutation,
+  useAsignarAdminMutation,
   useGetUsuariosStaffQuery, 
   useUpdateUsuarioRolMutation,
   useUpdateUsuarioCentroMutation,
-  useUpdateUsuarioEspecialidadesMutation
+  useUpdateUsuarioEspecialidadesMutation,
+  useGetAdminsDisponiblesQuery
 } = usuariosApi;
+

@@ -1,8 +1,6 @@
-import { UserCog, Tag, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import type { IUsuario } from '../../models/types';
 import type { CentroMedico } from '../../services/centrosMedicosApi';
-
-const ROLES_DISPONIBLES = ['MEDICO', 'ADMINISTRATIVO', 'DIRECTOR', 'SECRETARIA'];
 
 interface StaffTableRowProps {
   usuario: IUsuario;
@@ -10,7 +8,6 @@ interface StaffTableRowProps {
   isDirector: boolean;
   isUpdating: boolean;
   onCentroChange: (usuarioId: number, centroIdStr: string) => Promise<void>;
-  onRolChange: (usuarioId: number, nuevoRol: string) => Promise<void>;
   onOpenEspModal: (usuario: IUsuario) => void;
 }
 
@@ -20,7 +17,6 @@ export default function StaffTableRow({
   isDirector,
   isUpdating,
   onCentroChange,
-  onRolChange,
   onOpenEspModal
 }: StaffTableRowProps) {
   return (
@@ -89,25 +85,6 @@ export default function StaffTableRow({
           </div>
         ) : (
           <span className="text-xs text-on-surface-variant/30 italic">No aplica</span>
-        )}
-      </td>
-      <td className="px-6 py-5 text-right">
-        {isDirector ? (
-          <div className="flex items-center justify-end gap-3">
-            <UserCog className="w-4 h-4 text-on-surface-variant" />
-            <select
-              defaultValue={usuario.rol}
-              disabled={isUpdating}
-              onChange={(e) => onRolChange(usuario.id, e.target.value)}
-              className="bg-surface-container-high border-none text-sm font-medium rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-primary transition-all cursor-pointer disabled:opacity-50"
-            >
-              {ROLES_DISPONIBLES.map(r => (
-                <option key={r} value={r}>{r}</option>
-              ))}
-            </select>
-          </div>
-        ) : (
-          <Tag className="w-4 h-4 text-on-surface-variant inline-block opacity-50" />
         )}
       </td>
     </tr>
