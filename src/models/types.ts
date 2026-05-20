@@ -8,7 +8,7 @@ export interface ICentroMedico {
 }
 
 export interface IUsuario {
-   id: number; idAuth: string; rut: string; nombreCompleto: string; correo: string; rol: string; especialidades?: IEspecialidad[]; 
+   id: number; idAuth: string; rut: string; nombreCompleto: string; correo: string; rol: string; especialidades?: IEspecialidad[]; centroMedico?: ICentroMedico;
   }
   
 export interface IReserva { 
