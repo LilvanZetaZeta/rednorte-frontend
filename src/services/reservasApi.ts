@@ -1,5 +1,5 @@
 import { apiGateway } from './apiGateway';
-import type { IReserva } from '../models/types';
+import type { IReserva, CrearReservaPayload } from '../models/types';
 
 export const reservasApi = apiGateway.injectEndpoints({
   endpoints: (builder) => ({
@@ -15,7 +15,7 @@ export const reservasApi = apiGateway.injectEndpoints({
       query: (idAuth) => `/reservas/medico/${idAuth}`,
       providesTags: ['Reservas'],
     }),
-    crearReserva: builder.mutation<IReserva, any>({
+    crearReserva: builder.mutation<IReserva, CrearReservaPayload>({
       query: (body) => ({ url: '/reservas', method: 'POST', body }),
       invalidatesTags: ['Reservas'],
     }),
@@ -31,7 +31,6 @@ export const reservasApi = apiGateway.injectEndpoints({
       }),
       invalidatesTags: ['Reservas'],
     }),
-    // NUEVA MUTACIÓN INTEGRADA A RTK QUERY
     bloquearAgendaMedico: builder.mutation<void, { medicoId: number, fechaBloqueo: string }>({
       query: (body) => ({ 
         url: '/reasignaciones/agenda/bloquear', 

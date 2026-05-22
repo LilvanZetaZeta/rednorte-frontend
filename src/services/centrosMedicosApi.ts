@@ -1,20 +1,17 @@
 import { apiGateway } from './apiGateway';
-
-export interface CentroMedico {
-  id?: number;
-  nombreSucursal: string;
-  region: string;
-  comuna: string;
-  direccion: string;
-}
+import type { ICentroMedico } from '../models/types';
 
 export const centrosMedicosApi = apiGateway.injectEndpoints({
   endpoints: (builder) => ({
-    getCentros: builder.query<CentroMedico[], void>({
+    obtenerCentrosMedicos: builder.query<ICentroMedico[], void>({
       query: () => '/centros-medicos',
       providesTags: ['CentrosMedicos'],
     }),
-    createCentro: builder.mutation<CentroMedico, Partial<CentroMedico>>({
+    getCentros: builder.query<ICentroMedico[], void>({
+      query: () => '/centros-medicos',
+      providesTags: ['CentrosMedicos'],
+    }),
+    createCentro: builder.mutation<ICentroMedico, Partial<ICentroMedico>>({
       query: (body) => ({
         url: '/centros-medicos',
         method: 'POST',
@@ -22,7 +19,7 @@ export const centrosMedicosApi = apiGateway.injectEndpoints({
       }),
       invalidatesTags: ['CentrosMedicos'],
     }),
-    updateCentro: builder.mutation<CentroMedico, { id: number; data: Partial<CentroMedico> }>({
+    updateCentro: builder.mutation<ICentroMedico, { id: number; data: Partial<ICentroMedico> }>({
       query: ({ id, data }) => ({
         url: `/centros-medicos/${id}`,
         method: 'PUT',
@@ -45,6 +42,7 @@ export const centrosMedicosApi = apiGateway.injectEndpoints({
 });
 
 export const {
+  useObtenerCentrosMedicosQuery,
   useGetCentrosQuery,
   useCreateCentroMutation,
   useUpdateCentroMutation,

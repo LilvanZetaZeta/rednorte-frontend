@@ -6,7 +6,7 @@ import {
   useDeleteCentroMutation,
 } from '../services/centrosMedicosApi';
 import { useGetAdminsDisponiblesQuery, useUpdateUsuarioCentroMutation } from '../services/usuariosApi';
-import type { CentroMedico } from '../services/centrosMedicosApi';
+import type { ICentroMedico } from '../models/types';
 
 export const useGestionCentrosVM = () => {
   const { data: centros, isLoading, isError, refetch } = useGetCentrosQuery();
@@ -17,7 +17,7 @@ export const useGestionCentrosVM = () => {
   const [updateUsuarioCentro] = useUpdateUsuarioCentroMutation();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingCentro, setEditingCentro] = useState<CentroMedico | null>(null);
+  const [editingCentro, setEditingCentro] = useState<ICentroMedico | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleOpenCreate = () => {
@@ -25,33 +25,29 @@ export const useGestionCentrosVM = () => {
     setIsModalOpen(true);
   };
 
-  const handleOpenEdit = (centro: CentroMedico) => {
+  const handleOpenEdit = (centro: ICentroMedico) => {
     setEditingCentro(centro);
     setIsModalOpen(true);
   };
 
   const handleSave = async (
-    data: Partial<CentroMedico>, 
+    data: Partial<ICentroMedico>, 
     newAdminId: number | null | undefined, 
     previousAdminId: number | null
   ) => {
     setIsSubmitting(true);
     try {
-      let savedCentro: CentroMedico;
+      let savedCentro: ICentroMedico;
       if (editingCentro?.id) {
         savedCentro = await updateCentro({ id: editingCentro.id, data }).unwrap();
       } else {
         savedCentro = await createCentro(data).unwrap();
       }
 
-      // newAdminId === undefined means no change was made
       if (newAdminId !== undefined) {
-        // Unlink previous admin if there was one
         if (previousAdminId && previousAdminId !== newAdminId) {
           await updateUsuarioCentro({ id: previousAdminId, centroId: null }).unwrap();
         }
-
-        // Link new admin if one was selected
         if (newAdminId && savedCentro.id) {
           await updateUsuarioCentro({ id: newAdminId, centroId: savedCentro.id }).unwrap();
         }
@@ -68,15 +64,12 @@ export const useGestionCentrosVM = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('¿Estás seguro de eliminar este centro médico?')) {
-      try {
-        await deleteCentro(id).unwrap();
-        return { success: true };
-      } catch (error) {
-        return { success: false, error: 'Error al eliminar el centro médico' };
-      }
+    try {
+      await deleteCentro(id).unwrap();
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: 'Error al eliminar el centro médico' };
     }
-    return { success: false };
   };
 
   return {

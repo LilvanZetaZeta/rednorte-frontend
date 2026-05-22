@@ -5,31 +5,28 @@ import { useGetCentrosQuery } from '../services/centrosMedicosApi';
 import { useCrearReservaMutation } from '../services/reservasApi';
 import { useAuthVM } from './useAuthVM';
 import { useObtenerMiPerfilQuery } from '../services/perfilPacienteApi';
+import type { ICentroMedico, IEspecialidad, IUsuario } from '../models/types';
 
 export const useReservasVM = () => {
   const navigate = useNavigate();
   const { session } = useAuthVM();
   
-  // Perfil del paciente
   const { data: perfil } = useObtenerMiPerfilQuery(session?.user?.id || '', { skip: !session?.user?.id });
   
-  // Estados de selección
-  const [centroSelec, setCentroSelec] = useState<any>(null);
-  const [espSelec, setEspSelec] = useState<any>(null);
-  const [medicoSelec, setMedicoSelec] = useState<any>(null);
+  const [centroSelec, setCentroSelec] = useState<ICentroMedico | null>(null);
+  const [espSelec, setEspSelec] = useState<IEspecialidad | null>(null);
+  const [medicoSelec, setMedicoSelec] = useState<IUsuario | null>(null);
   const [fechaHora, setFechaHora] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  // Consultas
   const { data: centros, isLoading: loadC } = useGetCentrosQuery();
   const { data: especialidades, isLoading: loadEsp } = useGetEspecialidadesQuery();
   const [buscarMedicos, { data: medicos, isLoading: loadMed }] = useLazyBuscarMedicosPorEspecialidadQuery();
   const [crear, { isLoading: isSubmitting }] = useCrearReservaMutation();
 
-  // Efecto para buscar médicos cuando se selecciona especialidad
   useEffect(() => {
     if (espSelec) {
-      buscarMedicos(espSelec.nombre); // El servicio buscarMedicosPorEspecialidad espera el nombre de la especialidad
+      buscarMedicos({ especialidad: espSelec.nombre });
       setMedicoSelec(null);
       setError(null);
     }
