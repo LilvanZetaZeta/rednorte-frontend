@@ -1,10 +1,10 @@
 import { Plus } from 'lucide-react';
 import type { IUsuario } from '../../models/types';
-import type { CentroMedico } from '../../services/centrosMedicosApi';
+import type { ICentroMedico } from '../../models/types';
 
 interface StaffTableRowProps {
   usuario: IUsuario;
-  centros?: CentroMedico[];
+  centros?: ICentroMedico[];
   isDirector: boolean;
   isUpdating: boolean;
   onCentroChange: (usuarioId: number, centroIdStr: string) => Promise<void>;
