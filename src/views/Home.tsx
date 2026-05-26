@@ -182,7 +182,7 @@ export default function Home() {
             <div className="relative w-full aspect-[4/3] rounded-[40px] overflow-hidden shadow-2xl bg-slate-200">
               <img src={heroImage} alt="Clínica Moderna" className="w-full h-full object-cover" />
               
-              <div className="absolute top-8 left-8 bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-xl flex items-center gap-4 animate-bounce hover:animate-none transition-all duration-500">
+              <div className="absolute top-8 left-8 bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-xl flex items-center gap-4 transition-all duration-500">
                 <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
                   <Activity size={24} />
                 </div>

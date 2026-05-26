@@ -35,8 +35,11 @@ export const usePortalPacienteVM = () => {
   const [actualizarPerfil] = useActualizarPerfilMutation();
 
   const handleCancelar = async (id: number) => {
-    if (window.confirm('¿Cancelar esta reserva?')) {
-      try { await cancelar(id).unwrap(); } catch { alert('Error al cancelar.'); }
+    try { 
+      await cancelar(id).unwrap(); 
+      return { success: true };
+    } catch { 
+      return { success: false, error: 'Error al cancelar la reserva.' }; 
     }
   };
 
@@ -54,14 +57,8 @@ export const usePortalPacienteVM = () => {
   };
 
   return {
-    userName,
-    userRut,
-    userEmail,
-    userId,
-    reservas,
-    perfil,          // prevision + telefonoContacto desde ms-portal
+    userName, userRut, userEmail, userId, reservas, perfil,
     isLoading: loadingReservas || loadingPerfil,
-    handleCancelar,
-    handleGuardarPerfil,
+    handleCancelar, handleGuardarPerfil,
   };
 };
