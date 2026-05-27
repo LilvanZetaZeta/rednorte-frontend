@@ -34,10 +34,10 @@ export default function StaffTableRow({
       </td>
       <td className="px-6 py-5">
         <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-tighter ${
-          usuario.rol === 'DIRECTOR' ? 'bg-primary-container text-primary' :
-          usuario.rol === 'MEDICO' ? 'bg-secondary-container text-secondary' :
-          usuario.rol === 'SECRETARIA' ? 'bg-error-container text-error' :
-          'bg-tertiary-container text-tertiary'
+          usuario.rol === 'DIRECTOR' ? 'bg-primary-container text-on-primary-container' :
+          usuario.rol === 'MEDICO' ? 'bg-secondary-container text-on-secondary-container' :
+          usuario.rol === 'SECRETARIA' ? 'bg-error-container text-on-error-container' :
+          'bg-tertiary-container text-on-tertiary-container'
         }`}>
           {usuario.rol}
         </span>

@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useDashboardCentroVM } from '../viewmodels/useDashboardCentroVM';
 import {
   Building2, Users, Loader2, Pencil, Trash2, Search,
-  Stethoscope, ClipboardList, CalendarCheck2, UserCheck, CheckCircle2
+  Stethoscope, ClipboardList, CalendarCheck2, UserCheck, CheckCircle2,
+  Plus
 } from 'lucide-react';
 import StatCard from '../components/ui/StatCard';
 import Input from '../components/ui/Input';
@@ -10,6 +11,7 @@ import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import Toast from '../components/ui/Toast';
 import ConfirmDialog from '../components/ui/ConfirmDialog'; // <-- IMPORTAMOS EL NUEVO COMPONENTE
+import SpecialtiesModal from '../components/dashboard/SpecialtiesModal';
 
 export default function DashboardCentro() {
   const vm = useDashboardCentroVM();
@@ -99,10 +101,10 @@ export default function DashboardCentro() {
 
       {/* KPI */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Total Reservas" value={vm.metricas.totalReservas} icon={<ClipboardList />} />
-        <StatCard title="Citas Vigentes" value={vm.metricas.vigentes} icon={<CalendarCheck2 />} colorClass="bg-secondary-container text-secondary" />
-        <StatCard title="Médicos" value={vm.metricas.medicos} icon={<Stethoscope />} colorClass="bg-tertiary-container text-tertiary" />
-        <StatCard title="Secretarias" value={vm.metricas.secretarias} icon={<Users />} />
+        <StatCard title="Total Reservas" value={vm.metricas.totalReservas} icon={<ClipboardList />} colorClass="bg-primary-container text-on-primary-container" />
+        <StatCard title="Citas Vigentes" value={vm.metricas.vigentes} icon={<CalendarCheck2 />} colorClass="bg-secondary-container text-on-secondary-container" />
+        <StatCard title="Médicos" value={vm.metricas.medicos} icon={<Stethoscope />} colorClass="bg-tertiary-container text-on-tertiary-container" />
+        <StatCard title="Secretarias" value={vm.metricas.secretarias} icon={<Users />} colorClass="bg-primary-container text-on-primary-container" />
       </section>
 
       {/* GRID */}
@@ -237,7 +239,7 @@ export default function DashboardCentro() {
                   <div key={u.id} className="p-5 flex items-start justify-between gap-4 hover:bg-surface-container-low/60 transition-colors group">
                     <div className="flex items-start gap-4 min-w-0">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${
-                        u.rol === 'MEDICO' ? 'bg-primary-container text-primary' : 'bg-secondary-container text-secondary'
+                        u.rol === 'MEDICO' ? 'bg-primary-container text-on-primary-container' : 'bg-secondary-container text-on-secondary-container'
                       }`}>
                         {getInitials(u.nombreCompleto)}
                       </div>
@@ -245,19 +247,30 @@ export default function DashboardCentro() {
                         <div className="flex items-center gap-2 flex-wrap mb-0.5">
                           <span className="font-medium text-on-surface text-sm">{u.nombreCompleto}</span>
                           <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${
-                            u.rol === 'MEDICO' ? 'bg-primary-container text-primary' : 'bg-secondary-container text-secondary'
+                            u.rol === 'MEDICO' ? 'bg-primary-container text-on-primary-container' : 'bg-secondary-container text-on-secondary-container'
                           }`}>
                             {u.rol === 'MEDICO' ? 'Médico' : 'Secretaria'}
                           </span>
                         </div>
                         <p className="text-xs text-on-surface-variant truncate">{u.correo}</p>
-                        {u.especialidades && u.especialidades.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {u.especialidades.map(esp => (
-                              <span key={esp.id} className="text-xs bg-tertiary-container text-tertiary px-2 py-0.5 rounded-full">
-                                {esp.nombre}
-                              </span>
-                            ))}
+                        {u.rol === 'MEDICO' && (
+                          <div className="flex flex-wrap gap-1 mt-2 items-center">
+                            {u.especialidades && u.especialidades.length > 0 ? (
+                              u.especialidades.map(esp => (
+                                <span key={esp.id} className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/20 font-bold">
+                                  {esp.nombre}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-xs text-on-surface-variant/50 italic">Sin especialidad</span>
+                            )}
+                            <button
+                              onClick={() => vm.handleOpenEspModal(u)}
+                              className="p-1 hover:bg-primary/10 rounded-full text-primary transition-colors ml-1"
+                              title="Gestionar especialidades"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                            </button>
                           </div>
                         )}
                       </div>
@@ -344,6 +357,23 @@ export default function DashboardCentro() {
           )}
         </form>
       </Modal>
+
+      <SpecialtiesModal
+        doctor={vm.editingDoctorForEsp}
+        especialidades={vm.especialidades}
+        selectedEspIds={vm.selectedEspIds}
+        isUpdating={vm.isSubmitting}
+        onClose={vm.handleCloseEspModal}
+        onSave={async () => {
+          const result = await vm.handleSaveEspecialidades();
+          if (result.success) {
+            showMsg({ text: 'Especialidades actualizadas correctamente', type: 'success' });
+          } else {
+            showMsg({ text: result.error || 'Error al actualizar especialidades', type: 'error' });
+          }
+        }}
+        onToggleEspSelection={vm.handleToggleEspSelection}
+      />
     </div>
   );
 }

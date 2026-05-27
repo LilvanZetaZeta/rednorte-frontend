@@ -61,7 +61,7 @@ export default function SpecialtiesModal({
             >
               <div className="flex items-center gap-3">
                 <Stethoscope className={`w-5 h-5 ${isSelected ? 'text-primary' : 'text-on-surface-variant'}`} />
-                <span className={`font-medium ${isSelected ? 'text-on-primary-container' : 'text-on-surface'}`}>
+                <span className={`font-medium ${isSelected ? 'text-primary' : 'text-on-surface'}`}>
                   {esp.nombre}
                 </span>
               </div>

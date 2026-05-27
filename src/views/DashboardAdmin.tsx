@@ -55,13 +55,13 @@ export default function DashboardAdmin() {
           <h1 className="font-h1 text-h1 text-on-background mb-1">Panel de Administración</h1>
           <p className="text-on-surface-variant">Gestión de personal y especialidades</p>
         </div>
-        <div className="p-3 bg-primary-container text-primary rounded-2xl"><ShieldCheck className="w-6 h-6" /></div>
+        <div className="p-3 bg-primary-container text-on-primary-container rounded-2xl"><ShieldCheck className="w-6 h-6" /></div>
       </section>
 
       <StaffTable
         staff={staff}
         centros={centros}
-        isDirector={!isDirector}
+        isDirector={isDirector}
         isUpdating={isUpdating}
         onCentroChange={onCentroChange}
         onOpenEspModal={openEspModal}

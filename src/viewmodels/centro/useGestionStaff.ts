@@ -47,6 +47,40 @@ export const useGestionStaff = (miCentroId: number | null) => {
     nombreCompleto: '', correo: '', especialidadIds: [],
   });
 
+  const [editingDoctorForEsp, setEditingDoctorForEsp] = useState<IUsuario | null>(null);
+  const [selectedEspIds, setSelectedEspIds] = useState<number[]>([]);
+
+  const handleOpenEspModal = (u: IUsuario) => {
+    setEditingDoctorForEsp(u);
+    setSelectedEspIds(u.especialidades?.map(e => e.id) ?? []);
+  };
+
+  const handleCloseEspModal = () => {
+    setEditingDoctorForEsp(null);
+    setSelectedEspIds([]);
+  };
+
+  const handleToggleEspSelection = (id: number) => {
+    setSelectedEspIds(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleSaveEspecialidades = async (): Promise<{ success: boolean; error?: string }> => {
+    if (!editingDoctorForEsp) return { success: false };
+    setIsSubmitting(true);
+    try {
+      await updateEspecialidades({ id: editingDoctorForEsp.id, especialidadIds: selectedEspIds }).unwrap();
+      refetchStaff();
+      setEditingDoctorForEsp(null);
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err?.data?.error || 'Error al actualizar especialidades' };
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const staffDelCentro = useMemo(() => {
     if (!todosStaff || !miCentroId) return [];
     return todosStaff.filter(
@@ -159,6 +193,12 @@ export const useGestionStaff = (miCentroId: number | null) => {
     handleAsignar, 
     handleOpenEdit, 
     handleGuardarEdit, 
-    handleEliminar
+    handleEliminar,
+    editingDoctorForEsp,
+    selectedEspIds,
+    handleOpenEspModal,
+    handleCloseEspModal,
+    handleToggleEspSelection,
+    handleSaveEspecialidades
   };
 };
