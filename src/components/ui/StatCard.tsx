@@ -5,7 +5,7 @@ interface StatCardProps {
   value: string | number;
   subtitle?: string;
   icon: ReactNode;
-  colorClass?: string; // Ej: 'bg-primary-container text-primary'
+  colorClass?: string; // Ej: 'bg-primary-container text-on-primary-container'
 }
 
 export default function StatCard({ 
@@ -13,7 +13,7 @@ export default function StatCard({
   value, 
   subtitle, 
   icon, 
-  colorClass = 'bg-primary-container text-primary' 
+  colorClass = 'bg-primary-container text-on-primary-container' 
 }: StatCardProps) {
   return (
     <div className="bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">

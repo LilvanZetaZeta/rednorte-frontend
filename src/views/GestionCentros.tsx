@@ -102,7 +102,7 @@ export default function GestionCentros() {
           return (
             <div key={c.id} className="bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant shadow-sm hover:shadow-md transition-all group">
               <div className="flex justify-between items-start mb-4">
-                <div className="p-3 bg-primary-container text-primary rounded-2xl">
+                <div className="p-3 bg-primary-container text-on-primary-container rounded-2xl">
                   <Building2 className="w-6 h-6" />
                 </div>
                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">

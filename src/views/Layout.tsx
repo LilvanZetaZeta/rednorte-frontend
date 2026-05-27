@@ -14,10 +14,11 @@ export default function Layout() {
     ...(vm.userRole === 'director' ? [
       { name: 'Dashboard Ejecutivo', path: '/director/portal', icon: BarChart3 }, 
       { name: 'Gestión de Centros', path: '/director/centros', icon: Building2 },
-      { name: 'Gestión de Especialidades', path: '/director/especialidades', icon: Activity }
-    ] : []),
-    ...(vm.userRole === 'director' || vm.userRole === 'administrativo' ? [
+      { name: 'Gestión de Especialidades', path: '/director/especialidades', icon: Activity },
       { name: 'Gestión de Staff', path: '/admin/dashboard', icon: Users }
+    ] : []),
+    ...(vm.userRole === 'administrativo' ? [
+      { name: 'Mi Sucursal', path: '/admin/centro', icon: Building2 }
     ] : [])
   ];
 

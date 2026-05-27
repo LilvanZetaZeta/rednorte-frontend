@@ -58,7 +58,7 @@ export default function App() {
           <Route path="/director/portal" element={<ProtectedRoute allowedRoles={['DIRECTOR']}><PortalDirector /></ProtectedRoute>} />
           <Route path="/director/centros" element={<ProtectedRoute allowedRoles={['DIRECTOR']}><GestionCentros /></ProtectedRoute>} />
           <Route path="/director/especialidades" element={<ProtectedRoute allowedRoles={['DIRECTOR']}><GestionEspecialidades /></ProtectedRoute>} />
-          <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['ADMINISTRATIVO', 'DIRECTOR']}><DashboardAdmin /></ProtectedRoute>} />
+          <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['DIRECTOR']}><DashboardAdmin /></ProtectedRoute>} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
