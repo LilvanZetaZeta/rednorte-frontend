@@ -3,10 +3,13 @@ import type { IEspecialidad, IUsuario } from '../models/types';
 
 export const catalogosApi = apiGateway.injectEndpoints({
   endpoints: (builder) => ({
-    getEspecialidades: builder.query<IEspecialidad[], void>({ query: () => '/especialidades', providesTags: ['Especialidades'] }),
+    getEspecialidades: builder.query<IEspecialidad[], void>({ 
+      query: () => '/portal/especialidades', 
+      providesTags: ['Especialidades'] 
+    }),
     crearEspecialidad: builder.mutation<IEspecialidad, Partial<IEspecialidad>>({
       query: (nueva) => ({
-        url: '/especialidades',
+        url: '/gestion/especialidades',
         method: 'POST',
         body: nueva,
       }),
@@ -14,7 +17,7 @@ export const catalogosApi = apiGateway.injectEndpoints({
     }),
     actualizarEspecialidad: builder.mutation<IEspecialidad, { id: number, data: Partial<IEspecialidad> }>({
       query: ({ id, data }) => ({
-        url: `/especialidades/${id}`,
+        url: `/gestion/especialidades/${id}`,
         method: 'PUT',
         body: data,
       }),
@@ -22,14 +25,14 @@ export const catalogosApi = apiGateway.injectEndpoints({
     }),
     eliminarEspecialidad: builder.mutation<void, number>({
       query: (id) => ({
-        url: `/especialidades/${id}`,
+        url: `/gestion/especialidades/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Especialidades'],
     }),
     buscarMedicosPorEspecialidad: builder.query<IUsuario[], { especialidad?: string, centroId?: number, especialidadId?: number }>({
       query: ({ especialidad, centroId, especialidadId }) => {
-        let url = '/usuarios/medicos/buscar?';
+        let url = '/portal/usuarios/medicos/buscar?';
         if (centroId && especialidadId) {
           url += `centroId=${centroId}&especialidadId=${especialidadId}`;
         } else if (especialidad) {
@@ -41,6 +44,7 @@ export const catalogosApi = apiGateway.injectEndpoints({
     }),
   }),
 });
+
 export const { 
   useGetEspecialidadesQuery, 
   useLazyBuscarMedicosPorEspecialidadQuery,
