@@ -1,0 +1,126 @@
+import { Link } from 'react-router-dom';
+import { usePortalPacienteVM } from '../viewmodels/usePortalPacienteVM';
+import { Stethoscope, CalendarDays, User, Phone, Shield, Pencil } from 'lucide-react';
+import { useState } from 'react';
+import Modal from '../components/ui/Modal';
+import Input from '../components/ui/Input';
+import Button from '../components/ui/Button';
+import Toast from '../components/ui/Toast';
+import ConfirmDialog from '../components/ui/ConfirmDialog';
+import type { IReserva } from '../models/types';
+
+export default function PortalPaciente() {
+  const { userName, userRut, userEmail, reservas, perfil, isLoading, handleCancelar, handleGuardarPerfil } = usePortalPacienteVM();
+  const [editandoPerfil, setEditandoPerfil] = useState(false);
+  const [prevision, setPrevision] = useState('');
+  const [telefono, setTelefono] = useState('');
+  
+  const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
+  const [cancelarConfig, setCancelarConfig] = useState({ isOpen: false, id: 0 });
+
+  const showMsg = (text: string, type: 'success' | 'error') => {
+    setMessage({ text, type });
+    setTimeout(() => setMessage(null), 5000);
+  };
+
+  const abrirEdicion = () => {
+    setPrevision(perfil?.prevision || '');
+    setTelefono(perfil?.telefonoContacto || '');
+    setEditandoPerfil(true);
+  };
+
+  const guardar = async () => {
+    const result = await handleGuardarPerfil({ prevision, telefonoContacto: telefono });
+    if(result.success) showMsg('Perfil actualizado', 'success');
+    else showMsg('Error al guardar el perfil', 'error');
+    setEditandoPerfil(false);
+  };
+
+  const confirmarCancelacion = async () => {
+    const result = await handleCancelar(cancelarConfig.id);
+    if(result.success) showMsg('La cita ha sido cancelada.', 'success');
+    else showMsg(result.error || 'Error', 'error');
+    setCancelarConfig({ isOpen: false, id: 0 });
+  };
+
+  if (isLoading) return <div className="p-12 text-center text-primary">Cargando tu portal...</div>;
+
+  return (
+    <div className="animate-fade-in space-y-8">
+      
+      {message && <Toast message={message.text} type={message.type} />}
+
+      <section>
+        <h1 className="font-h1 text-h1 mb-1">Buenos días, {userName}.</h1>
+        <p className="text-on-surface-variant">Este es tu resumen de salud.</p>
+      </section>
+
+      <section className="bg-surface-container-lowest border border-outline-variant rounded-3xl p-8 shadow-sm">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="font-h3 text-h3 flex items-center gap-2"><User className="text-primary w-5 h-5" /> Mi Perfil</h2>
+          <Button variant="outline" onClick={abrirEdicion} icon={<Pencil className="w-4 h-4" />} className="!py-2 !px-4 text-sm">Editar</Button>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div><p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">RUT</p><p className="font-medium text-lg">{userRut || '—'}</p></div>
+          <div><p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Correo</p><p className="font-medium text-sm truncate pt-1">{userEmail || '—'}</p></div>
+          <div><p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1 flex items-center gap-1"><Shield className="w-4 h-4" /> Previsión</p><p className="font-medium text-lg">{perfil?.prevision || <span className="text-on-surface-variant italic text-sm">No registrada</span>}</p></div>
+          <div><p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1 flex items-center gap-1"><Phone className="w-4 h-4" /> Teléfono</p><p className="font-medium text-lg">{perfil?.telefonoContacto || <span className="text-on-surface-variant italic text-sm">No registrado</span>}</p></div>
+        </div>
+      </section>
+
+      <Modal
+        isOpen={editandoPerfil}
+        onClose={() => setEditandoPerfil(false)}
+        title="Actualizar mi Perfil"
+        maxWidth="sm"
+        footer={<div className="flex gap-3"><Button variant="outline" onClick={() => setEditandoPerfil(false)} className="flex-1">Cancelar</Button><Button onClick={guardar} className="flex-1">Guardar</Button></div>}
+      >
+        <div className="space-y-4">
+          <Input label="Previsión" value={prevision} onChange={e => setPrevision(e.target.value)} placeholder="Ej: Fonasa A, Isapre Cruz Blanca..." />
+          <Input label="Teléfono de contacto" value={telefono} onChange={e => setTelefono(e.target.value)} placeholder="+56 9 1234 5678" />
+        </div>
+      </Modal>
+
+      <ConfirmDialog
+        isOpen={cancelarConfig.isOpen}
+        title="Cancelar Cita"
+        message="¿Estás seguro de que deseas cancelar esta reserva? Esta acción no se puede deshacer."
+        isDestructive={true}
+        confirmText="Sí, cancelar cita"
+        onConfirm={confirmarCancelacion}
+        onCancel={() => setCancelarConfig({ isOpen: false, id: 0 })}
+      />
+
+      <section>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="font-h3 text-h3">Próximas Citas</h2>
+          <Link to="/agendar"><Button>Nueva Reserva</Button></Link>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {reservas.length === 0 ? (
+            <div className="col-span-full p-12 text-center bg-surface-container-lowest border border-dashed border-outline-variant rounded-3xl"><p className="text-on-surface-variant font-medium">No tienes citas agendadas.</p></div>
+          ) : (
+            reservas.map((res: IReserva) => (
+              <div key={res.id} className="bg-surface-container-lowest border border-outline-variant rounded-3xl p-6 shadow-sm">
+                <div className="flex justify-between items-start mb-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-secondary-container flex items-center justify-center text-secondary"><Stethoscope /></div>
+                    <div><h3 className="font-bold text-lg text-on-surface">Dr. {res.medico.nombreCompleto}</h3><p className="text-sm text-on-surface-variant">{res.centro.nombreSucursal}</p></div>
+                  </div>
+                  <span className="px-3 py-1.5 bg-surface-container-high rounded-full text-xs font-bold uppercase tracking-wide">{res.estado}</span>
+                </div>
+                <div className="flex items-center gap-2 text-on-surface-variant mb-6 bg-surface-container-high p-3 rounded-xl border border-surface-variant">
+                  <CalendarDays className="w-5 h-5 text-primary" />
+                  <span className="text-sm font-bold text-on-surface">{new Date(res.fechaHora).toLocaleString('es-CL')}</span>
+                </div>
+                {res.estado !== 'CANCELADA' && (
+                  <Button variant="danger" onClick={() => setCancelarConfig({ isOpen: true, id: res.id })} className="w-full">Cancelar Cita</Button>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
