@@ -69,10 +69,16 @@ export default function PortalDoctor() {
               </div>
               <div className="p-8 flex-1 flex flex-col gap-4 bg-surface-container-lowest">
                 <h3 className="font-bold text-on-surface flex items-center gap-2"><FileText size={18} className="text-primary"/> Registro de Atención</h3>
-                <textarea className="w-full flex-1 border border-outline-variant rounded-2xl p-5 bg-surface-container-high outline-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all resize-none text-sm" placeholder="Escriba la evolución clínica, anamnesis, diagnóstico y tratamiento aquí..."></textarea>
+                <textarea
+                  className="w-full flex-1 border border-outline-variant rounded-2xl p-5 bg-surface-container-high outline-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all resize-none text-sm"
+                  placeholder="Escriba la evolución clínica, anamnesis, diagnóstico y tratamiento aquí..."
+                  value={vm.evolucion}
+                  onChange={(e) => vm.setEvolucion(e.target.value)}
+                  disabled={vm.isUpdating}
+                ></textarea>
                 <div className="flex justify-end gap-4 pt-4 border-t border-outline-variant/50">
-                  <Button variant="outline" onClick={() => vm.setPacienteActivo(null)}>Cerrar Ficha</Button>
-                  <Button variant="primary" onClick={() => setFinalizarConfig({isOpen: true, id: vm.pacienteActivo!.id})} icon={<CheckCircle size={18} />} className="!bg-success !text-on-success hover:!bg-success/90 !shadow-success/20">Finalizar Consulta</Button>
+                  <Button variant="outline" onClick={() => vm.setPacienteActivo()} disabled={vm.isUpdating}>Cerrar Ficha</Button>
+                  <Button variant="primary" onClick={() => setFinalizarConfig({isOpen: true, id: vm.pacienteActivo!.id})} icon={<CheckCircle size={18} />} isLoading={vm.isUpdating} disabled={vm.isUpdating} className="!bg-success !text-on-success hover:!bg-success/90 !shadow-success/20">Finalizar Consulta</Button>
                 </div>
               </div>
             </div>
