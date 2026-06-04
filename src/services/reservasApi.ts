@@ -62,6 +62,22 @@ export const reservasApi = apiGateway.injectEndpoints({
       }),
       invalidatesTags: ['Reservas'],
     }),
+    // Persiste la evolución clínica del paciente (anamnesis, diagnóstico, tratamiento)
+    // en el historial de citas antes de marcar la reserva como ATENDIDA.
+    guardarEvolucionClinica: builder.mutation<void, { reservaId: number; evolucion: string; medicoId: number; pacienteId: number }>({
+      query: (body) => ({
+        url: '/gestion/historial-citas',
+        method: 'POST',
+        body: {
+          reservaId: body.reservaId,
+          evolucionClinica: body.evolucion,
+          medicoId: body.medicoId,
+          pacienteId: body.pacienteId,
+          fechaRegistro: new Date().toISOString(),
+        },
+      }),
+      invalidatesTags: ['Reservas'],
+    }),
   }),
 });
 
@@ -72,5 +88,6 @@ export const {
   useCrearReservaMutation, 
   useCancelarReservaMutation,
   useActualizarEstadoReservaMutation,
-  useBloquearAgendaMedicoMutation
+  useBloquearAgendaMedicoMutation,
+  useGuardarEvolucionClinicaMutation
 } = reservasApi;
