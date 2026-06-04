@@ -9,10 +9,7 @@ import type { IReserva } from '../models/types';
 
 export const usePortalDoctorVM = () => {
   const { session } = useAuthVM();
-  const idAuth = session?.user?.id || '';
   const doctorName = session?.user?.user_metadata?.nombre_completo || 'Doctor';
-  // El id del médico puede venir como metadato del usuario en Supabase o
-  // resolverse a partir de su perfil. Si no está, las mutaciones abortan.
   const medicoIdRaw = session?.user?.user_metadata?.medicoId as number | string | undefined;
   const medicoId =
     typeof medicoIdRaw === 'number'
@@ -21,9 +18,6 @@ export const usePortalDoctorVM = () => {
       ? Number(medicoIdRaw)
       : null;
 
-  // El endpoint /portal/reservas/medico/{medicoId} espera un Long numérico
-  // (no el UUID de Supabase). Si no tenemos un medicoId numérico, omitimos
-  // la consulta para evitar 404/400.
   const { data: reservasPage, isLoading } = useObtenerReservasPorMedicoQuery(
     { medicoId: medicoId ?? 0 },
     { skip: medicoId === null }
@@ -34,9 +28,6 @@ export const usePortalDoctorVM = () => {
   const [guardarEvolucion, { isLoading: isSavingEvolucion }] = useGuardarEvolucionClinicaMutation();
 
   const [pacienteActivo, setPacienteActivo] = useState<IReserva | null>(null);
-  // Estado controlado del textarea de evolución clínica.
-  // Se resetea cada vez que se selecciona un paciente distinto para evitar
-  // pegar texto de la consulta anterior en una nueva ficha.
   const [evolucion, setEvolucion] = useState('');
 
   useEffect(() => {
@@ -54,11 +45,6 @@ export const usePortalDoctorVM = () => {
     setEvolucion('');
   };
 
-  /**
-   * Persiste la evolución clínica en el historial del paciente y luego
-   * marca la reserva como ATENDIDA. Si la evolución está vacía, aborta
-   * la operación con un mensaje claro para evitar fichas clínicas vacías.
-   */
   const handleFinalizarAtencion = async (id: number) => {
     if (!pacienteActivo || pacienteActivo.id !== id) {
       return { success: false, error: 'No hay un paciente activo seleccionado.' };

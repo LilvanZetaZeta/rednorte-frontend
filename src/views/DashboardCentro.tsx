@@ -10,14 +10,13 @@ import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import Toast from '../components/ui/Toast';
-import ConfirmDialog from '../components/ui/ConfirmDialog'; // <-- IMPORTAMOS EL NUEVO COMPONENTE
+import ConfirmDialog from '../components/ui/ConfirmDialog';
 import SpecialtiesModal from '../components/dashboard/SpecialtiesModal';
 
 export default function DashboardCentro() {
   const vm = useDashboardCentroVM();
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   
-  // NUEVO ESTADO PARA EL DIÁLOGO DE CONFIRMACIÓN
   const [eliminarConfig, setEliminarConfig] = useState<{ isOpen: boolean; id: number; nombre: string }>({
     isOpen: false,
     id: 0,
