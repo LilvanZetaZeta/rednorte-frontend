@@ -27,7 +27,6 @@ export const useAgendaDiaria = (reservas: IReserva[] | undefined) => {
     { label: 'Canceladas', value: reservasHoy.filter(r => r.estado === 'CANCELADA' || r.estado === 'PENDIENTE_CANCELACION_ADMIN').length, sub: 'hoy' }
   ], [reservasHoy, llegadasPendientes]);
 
-  // ✅ useCallback: Evita recrear funciones en cada render
   const handleCheckIn = useCallback(async () => {
     if (!rutBusqueda) return { success: false, error: "Ingrese un RUT para procesar" };
     const reserva = llegadasPendientes.find(r => r.paciente.rut === rutBusqueda);

@@ -1,7 +1,6 @@
 import { apiGateway } from './apiGateway';
 import type { IReserva, CrearReservaPayload } from '../models/types';
 
-// ✅ Interfaz para respuesta paginada
 export interface PageResponse<T> {
   content: T[];
   totalElements: number;
@@ -19,13 +18,11 @@ export const reservasApi = apiGateway.injectEndpoints({
       query: (idAuth) => `/portal/reservas/paciente/${idAuth}`,
       providesTags: ['Reservas'],
     }),
-    // ✅ PAGINACIÓN: Ahora acepta parámetros de paginación
     obtenerReservasPorCentro: builder.query<PageResponse<IReserva>, { centroId: number; page?: number; size?: number }>({
       query: ({ centroId, page = 0, size = 20 }) => 
         `/portal/reservas/centro/${centroId}?page=${page}&size=${size}`,
       providesTags: ['Reservas'],
     }),
-    // ✅ PAGINACIÓN: Ahora acepta parámetros de paginación
     obtenerReservasPorMedico: builder.query<PageResponse<IReserva>, { medicoId: number; page?: number; size?: number }>({
       query: ({ medicoId, page = 0, size = 20 }) => 
         `/portal/reservas/medico/${medicoId}?page=${page}&size=${size}`,
@@ -62,8 +59,6 @@ export const reservasApi = apiGateway.injectEndpoints({
       }),
       invalidatesTags: ['Reservas'],
     }),
-    // Persiste la evolución clínica del paciente (anamnesis, diagnóstico, tratamiento)
-    // en el historial de citas antes de marcar la reserva como ATENDIDA.
     guardarEvolucionClinica: builder.mutation<void, { reservaId: number; evolucion: string; medicoId: number; pacienteId: number }>({
       query: (body) => ({
         url: '/gestion/historial-citas',
