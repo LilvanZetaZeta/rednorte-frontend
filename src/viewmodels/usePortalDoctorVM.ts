@@ -5,20 +5,22 @@ import {
   useActualizarEstadoReservaMutation,
   useGuardarEvolucionClinicaMutation,
 } from '../services/reservasApi';
+import { useGetUsuarioPorIdAuthQuery } from '../services/usuariosApi';
 import type { IReserva } from '../models/types';
 
 export const usePortalDoctorVM = () => {
   const { session } = useAuthVM();
   const doctorName = session?.user?.user_metadata?.nombre_completo || 'Doctor';
-  const medicoIdRaw = session?.user?.user_metadata?.medicoId as number | string | undefined;
-  const medicoId =
-    typeof medicoIdRaw === 'number'
-      ? medicoIdRaw
-      : typeof medicoIdRaw === 'string' && medicoIdRaw.trim() !== ''
-      ? Number(medicoIdRaw)
-      : null;
+  
+  // Obtener perfil del médico de la base de datos para recuperar su ID interno (medicoId)
+  const { data: usuarioDb, isLoading: isLoadingUsuario } = useGetUsuarioPorIdAuthQuery(
+    session?.user?.id || '',
+    { skip: !session?.user?.id }
+  );
 
-  const { data: reservasPage, isLoading } = useObtenerReservasPorMedicoQuery(
+  const medicoId = usuarioDb?.id || null;
+
+  const { data: reservasPage, isLoading: isLoadingReservas } = useObtenerReservasPorMedicoQuery(
     { medicoId: medicoId ?? 0 },
     { skip: medicoId === null }
   );
@@ -70,6 +72,7 @@ export const usePortalDoctorVM = () => {
         evolucion: evolucion.trim(),
         medicoId,
         pacienteId: pacienteActivo.paciente.id,
+        procedimiento: pacienteActivo.tipoReserva,
       }).unwrap();
 
       // 2) Marcar la reserva como ATENDIDA.
@@ -90,7 +93,7 @@ export const usePortalDoctorVM = () => {
   return {
     doctorName,
     agendaHoy,
-    isLoading,
+    isLoading: isLoadingUsuario || isLoadingReservas,
     isUpdating: isUpdating || isSavingEvolucion,
     pacienteActivo,
     setPacienteActivo: handleCerrarFicha,

@@ -73,3 +73,13 @@ export interface CrearReservaPayload {
 export interface AsignarRolPayload {
   correo: string;
 }
+
+export interface IHistorialCita {
+  id: number;
+  paciente: IUsuario;
+  medico: IUsuario;
+  fechaAtencion: string;
+  observaciones: string;
+  procedimientoRealizado: string | null;
+  reservaId: number;
+}
