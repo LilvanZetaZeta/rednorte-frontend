@@ -1,5 +1,5 @@
 import { apiGateway } from './apiGateway';
-import type { IReserva, CrearReservaPayload } from '../models/types';
+import type { IReserva, CrearReservaPayload, IHistorialCita } from '../models/types';
 
 export interface PageResponse<T> {
   content: T[];
@@ -59,19 +59,23 @@ export const reservasApi = apiGateway.injectEndpoints({
       }),
       invalidatesTags: ['Reservas'],
     }),
-    guardarEvolucionClinica: builder.mutation<void, { reservaId: number; evolucion: string; medicoId: number; pacienteId: number }>({
+    guardarEvolucionClinica: builder.mutation<void, { reservaId: number; evolucion: string; medicoId: number; pacienteId: number; procedimiento?: string }>({
       query: (body) => ({
         url: '/gestion/historial-citas',
         method: 'POST',
         body: {
-          reservaId: body.reservaId,
-          evolucionClinica: body.evolucion,
-          medicoId: body.medicoId,
           pacienteId: body.pacienteId,
-          fechaRegistro: new Date().toISOString(),
+          medicoId: body.medicoId,
+          observaciones: body.evolucion,
+          procedimientoRealizado: body.procedimiento || null,
+          reservaId: body.reservaId,
         },
       }),
       invalidatesTags: ['Reservas'],
+    }),
+    obtenerHistorialPorReserva: builder.query<IHistorialCita, number>({
+      query: (reservaId) => `/portal/historial-citas/reserva/${reservaId}`,
+      providesTags: ['Reservas'],
     }),
   }),
 });
@@ -84,5 +88,6 @@ export const {
   useCancelarReservaMutation,
   useActualizarEstadoReservaMutation,
   useBloquearAgendaMedicoMutation,
-  useGuardarEvolucionClinicaMutation
+  useGuardarEvolucionClinicaMutation,
+  useObtenerHistorialPorReservaQuery
 } = reservasApi;

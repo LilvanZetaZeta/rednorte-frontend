@@ -65,7 +65,16 @@ export default function PortalDoctor() {
             <div className="bg-surface-container-lowest border border-outline-variant rounded-3xl shadow-sm h-[700px] flex flex-col animate-in slide-in-from-right-8 overflow-hidden">
               <div className="p-8 border-b border-outline-variant bg-surface-container-low flex items-start gap-6 shrink-0">
                 <div className="w-20 h-20 bg-surface-container-lowest border border-outline-variant rounded-2xl flex items-center justify-center text-on-surface-variant shadow-sm shrink-0"><UserSquare2 size={40} /></div>
-                <div className="flex-1"><h2 className="text-2xl font-black text-on-surface">{vm.pacienteActivo.paciente.nombreCompleto}</h2><div className="flex gap-4 mt-2 text-sm font-medium text-on-surface-variant"><span>RUT: {vm.pacienteActivo.paciente.rut}</span><span>•</span><span>Correo: {vm.pacienteActivo.paciente.correo}</span></div></div>
+                <div className="flex-1">
+                  <h2 className="text-2xl font-black text-on-surface">{vm.pacienteActivo.paciente.nombreCompleto}</h2>
+                  <div className="flex gap-4 mt-2 text-sm font-medium text-on-surface-variant">
+                    <span>RUT: {vm.pacienteActivo.paciente.rut}</span>
+                    <span>•</span>
+                    <span>Correo: {vm.pacienteActivo.paciente.correo}</span>
+                    <span>•</span>
+                    <span>Origen: {vm.pacienteActivo.origen}</span>
+                  </div>
+                </div>
               </div>
               <div className="p-8 flex-1 flex flex-col gap-4 bg-surface-container-lowest">
                 <h3 className="font-bold text-on-surface flex items-center gap-2"><FileText size={18} className="text-primary"/> Registro de Atención</h3>
