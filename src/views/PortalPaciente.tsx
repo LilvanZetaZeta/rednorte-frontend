@@ -11,7 +11,12 @@ import type { IReserva } from '../models/types';
 import { useObtenerHistorialPorReservaQuery } from '../services/reservasApi';
 
 export default function PortalPaciente() {
-  const { userName, userRut, userEmail, reservas, perfil, isLoading, handleCancelar, handleGuardarPerfil } = usePortalPacienteVM();
+  
+  const { 
+    userName, userRut, userEmail, reservas, perfil, isLoading, handleCancelar, handleGuardarPerfil,
+    ofertaPendiente, handleResponderOferta, isProcesandoOferta 
+  } = usePortalPacienteVM();
+  
   const [editandoPerfil, setEditandoPerfil] = useState(false);
   const [prevision, setPrevision] = useState('');
   const [telefono, setTelefono] = useState('');
@@ -66,6 +71,16 @@ export default function PortalPaciente() {
     setCancelarConfig({ isOpen: false, id: 0 });
   };
 
+  //Función para manejar la respuesta a la oferta usando Toast
+  const responderAlerta = async (estado: 'ACEPTADA' | 'RECHAZADA') => {
+    const result = await handleResponderOferta(estado);
+    if (result.success) {
+      showMsg(`Cita ${estado.toLowerCase()} exitosamente.`, 'success');
+    } else {
+      showMsg(result.error || 'Error al procesar la oferta.', 'error');
+    }
+  };
+
   if (isLoading) return <div className="p-12 text-center text-primary">Cargando tu portal...</div>;
 
   return (
@@ -77,6 +92,40 @@ export default function PortalPaciente() {
         <h1 className="font-h1 text-h1 mb-1">Buenos días, {userName}.</h1>
         <p className="text-on-surface-variant">Este es tu resumen de salud.</p>
       </section>
+
+      {/* 3. INYECCIÓN: Componente visual de la Alerta de Reasignación */}
+      {ofertaPendiente && (
+        <section className="bg-primary-container border border-primary text-on-primary-container rounded-3xl p-8 shadow-sm animate-fade-in">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+            <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center text-white shrink-0 shadow-sm">
+              <CalendarDays className="w-7 h-7" />
+            </div>
+            <div className="flex-1">
+              <h2 className="font-h3 text-h3 mb-2">¡Tenemos un turno más temprano para ti!</h2>
+              <p className="mb-5 text-sm font-medium opacity-90">
+                Se ha liberado un cupo que coincide con tu lista de espera. Tienes hasta las <strong>{new Date(ofertaPendiente.tiempo_limite).toLocaleTimeString('es-CL')}</strong> para confirmar tu asistencia.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Button 
+                  onClick={() => responderAlerta('ACEPTADA')}
+                  disabled={isProcesandoOferta}
+                >
+                  {isProcesandoOferta ? 'Procesando...' : 'Aceptar Nueva Cita'}
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => responderAlerta('RECHAZADA')}
+                  disabled={isProcesandoOferta}
+                  className="bg-surface-container-lowest"
+                >
+                  Mantener mi cita original
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+      {/* FIN INYECCIÓN */}
 
       <section className="bg-surface-container-lowest border border-outline-variant rounded-3xl p-8 shadow-sm">
         <div className="flex justify-between items-center mb-6">
