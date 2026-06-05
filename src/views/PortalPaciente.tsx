@@ -8,7 +8,8 @@ import Button from '../components/ui/Button';
 import Toast from '../components/ui/Toast';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
 import type { IReserva } from '../models/types';
-import { useObtenerHistorialPorReservaQuery } from '../services/reservasApi';
+import StatusBadge from '../components/ui/StatusBadge';
+import HistorialDetalleModal from '../components/dashboard/HistorialDetalleModal';
 
 export default function PortalPaciente() {
   
@@ -29,22 +30,6 @@ export default function PortalPaciente() {
   const proximasCitas = reservas.filter(r => r.estado === 'VIGENTE' || r.estado === 'CONFIRMADA');
   const historialCitas = reservas.filter(r => r.estado !== 'VIGENTE' && r.estado !== 'CONFIRMADA');
 
-  const getEstadoBadgeClass = (estado: string) => {
-    switch (estado) {
-      case 'VIGENTE':
-        return 'bg-blue-50 text-blue-700 border-blue-100';
-      case 'CONFIRMADA':
-        return 'bg-green-50 text-green-700 border-green-100';
-      case 'ATENDIDO':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-100';
-      case 'CANCELADA':
-        return 'bg-red-50 text-red-700 border-red-100';
-      case 'NO_ASISTE':
-        return 'bg-amber-50 text-amber-700 border-amber-100';
-      default:
-        return 'bg-slate-50 text-slate-700 border-slate-100';
-    }
-  };
 
   const showMsg = (text: string, type: 'success' | 'error') => {
     setMessage({ text, type });
@@ -207,9 +192,7 @@ export default function PortalPaciente() {
                         <p className="text-sm text-on-surface-variant">{res.centro.nombreSucursal}</p>
                       </div>
                     </div>
-                    <span className={`px-3 py-1.5 border rounded-full text-xs font-bold uppercase tracking-wide ${getEstadoBadgeClass(res.estado)}`}>
-                      {res.estado.replace(/_/g, ' ')}
-                    </span>
+                    <StatusBadge estado={res.estado} />
                   </div>
                   <div className="flex items-center gap-2 text-on-surface-variant mb-6 bg-surface-container-high p-3 rounded-xl border border-surface-variant">
                     <CalendarDays className="w-5 h-5 text-primary" />
@@ -247,9 +230,7 @@ export default function PortalPaciente() {
                           <p className="text-sm text-on-surface-variant/70">{res.centro.nombreSucursal}</p>
                         </div>
                       </div>
-                      <span className={`px-3 py-1.5 border rounded-full text-xs font-bold uppercase tracking-wide ${getEstadoBadgeClass(res.estado)}`}>
-                        {res.estado.replace(/_/g, ' ')}
-                      </span>
+                      <StatusBadge estado={res.estado} />
                     </div>
                     <div className="flex items-center gap-2 text-on-surface-variant bg-surface-container-high p-3 rounded-xl border border-surface-variant">
                       <CalendarDays className="w-5 h-5 text-slate-400" />
@@ -276,75 +257,5 @@ export default function PortalPaciente() {
         />
       )}
     </div>
-  );
-}
-
-interface HistorialDetalleModalProps {
-  reservaId: number;
-  onClose: () => void;
-}
-
-function HistorialDetalleModal({ reservaId, onClose }: HistorialDetalleModalProps) {
-  const { data: historial, isLoading, error } = useObtenerHistorialPorReservaQuery(reservaId);
-
-  return (
-    <Modal
-      isOpen={true}
-      onClose={onClose}
-      title="Detalle de Atención Médica"
-      maxWidth="md"
-      footer={<Button onClick={onClose} className="w-full">Cerrar</Button>}
-    >
-      {isLoading ? (
-        <div className="py-8 text-center text-primary font-medium animate-pulse">
-          Cargando observaciones médicas...
-        </div>
-      ) : error ? (
-        <div className="p-4 text-center text-red-600 bg-red-50 border border-red-100 rounded-2xl font-medium">
-          No se encontraron comentarios para esta cita o hubo un error al cargarlos.
-        </div>
-      ) : historial ? (
-        <div className="space-y-6">
-          <div className="flex items-center gap-4 bg-surface-container-low p-4 rounded-2xl border border-outline-variant animate-fade-in">
-            <div className="w-12 h-12 rounded-2xl bg-secondary-container flex items-center justify-center text-secondary">
-              <Stethoscope className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="font-bold text-on-surface">Dr. {historial.medico.nombreCompleto}</h4>
-              <p className="text-sm text-on-surface-variant font-medium">
-                {historial.medico.especialidades?.[0]?.nombre || 'Médico General'}
-              </p>
-              <p className="text-xs text-on-surface-variant/70 mt-0.5 font-medium">
-                {historial.medico.centroMedico?.nombreSucursal || 'Centro Médico RedNorte'}
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 text-sm animate-fade-in">
-            <div className="bg-surface-container-high p-3 rounded-xl border border-surface-variant">
-              <span className="text-xs text-on-surface-variant block uppercase tracking-wider mb-1 font-semibold">Fecha de Atención</span>
-              <span className="font-medium text-on-surface">
-                {new Date(historial.fechaAtencion).toLocaleString('es-CL')}
-              </span>
-            </div>
-            {historial.procedimientoRealizado && (
-              <div className="bg-surface-container-high p-3 rounded-xl border border-surface-variant">
-                <span className="text-xs text-on-surface-variant block uppercase tracking-wider mb-1 font-semibold">Procedimiento</span>
-                <span className="font-medium text-on-surface">
-                  {historial.procedimientoRealizado.replace(/_/g, ' ')}
-                </span>
-              </div>
-            )}
-          </div>
-
-          <div className="bg-primary-container/20 border border-primary/10 rounded-2xl p-5 space-y-2 animate-fade-in">
-            <h5 className="font-bold text-primary text-sm uppercase tracking-wide">Observaciones Clínicas</h5>
-            <p className="text-on-surface leading-relaxed text-sm whitespace-pre-line font-medium">
-              {historial.observaciones}
-            </p>
-          </div>
-        </div>
-      ) : null}
-    </Modal>
   );
 }

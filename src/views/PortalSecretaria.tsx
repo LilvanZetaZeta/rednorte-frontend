@@ -9,6 +9,7 @@ import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import Toast from '../components/ui/Toast';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
+import StatusBadge from '../components/ui/StatusBadge';
 import WizardReservaSecretaria from '../components/ui/organisms/WizardReservaSecretaria';
 
 export default function PortalSecretaria() {
@@ -135,9 +136,7 @@ export default function PortalSecretaria() {
                           <h4 className={`font-bold ${isCancelada ? 'text-red-700 line-through' : 'text-[#00507d]'}`}>{reserva.paciente.nombreCompleto}</h4>
                           <p className="text-xs text-slate-500 font-medium">Médico: {reserva.medico.nombreCompleto}</p>
                         </div>
-                        <span className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase text-white ${isConfirmada ? 'bg-green-500' : isCancelada ? 'bg-red-400' : 'bg-[#00507d]'}`}>
-                          {reserva.estado.replace(/_/g, ' ')}
-                        </span>
+                        <StatusBadge estado={reserva.estado} className="!text-[9px] !px-2 !py-0.5" />
                       </div>
                       
                       {!isCancelada && reserva.estado !== 'FINALIZADA' && (

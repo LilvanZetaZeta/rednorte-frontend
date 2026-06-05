@@ -4,6 +4,7 @@ import { Stethoscope, ClipboardList, CheckCircle, Clock, UserSquare2, FileText, 
 import Button from '../components/ui/Button';
 import Toast from '../components/ui/Toast';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
+import StatusBadge from '../components/ui/StatusBadge';
 import type { IReserva } from '../models/types';
 
 export default function PortalDoctor() {
@@ -52,7 +53,7 @@ export default function PortalDoctor() {
             ) : (
               vm.agendaHoy.map((res: IReserva) => (
                 <div key={res.id} onClick={() => vm.handleLlamarPaciente(res)} className={`p-4 border-2 rounded-2xl cursor-pointer transition-all ${vm.pacienteActivo?.id === res.id ? 'border-primary bg-primary-container/20 shadow-md' : 'border-outline-variant hover:border-primary/50 hover:bg-surface-container-low'}`}>
-                  <div className="flex justify-between items-start mb-2"><h3 className="font-bold text-on-surface text-sm">{res.paciente.nombreCompleto}</h3><span className="text-[10px] font-bold uppercase bg-surface-container-high text-on-surface-variant px-2 py-0.5 rounded-full">{res.estado}</span></div>
+                  <div className="flex justify-between items-start mb-2"><h3 className="font-bold text-on-surface text-sm">{res.paciente.nombreCompleto}</h3><StatusBadge estado={res.estado} className="!text-[10px] !px-2 !py-0.5" /></div>
                   <div className="flex items-center justify-between text-xs text-on-surface-variant font-medium"><span className="flex items-center gap-1"><Clock size={14}/> {new Date(res.fechaHora).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span><ChevronRight size={16} className={vm.pacienteActivo?.id === res.id ? 'text-primary' : 'text-on-surface-variant/50'} /></div>
                 </div>
               ))
