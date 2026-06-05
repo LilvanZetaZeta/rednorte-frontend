@@ -3,7 +3,7 @@ services:
     build: .
     container_name: rednorte-frontend-app
     ports:
-      - "5173:5173"
+      - "5173:80"
     restart: unless-stopped
     networks:
       - network-RedNorte
