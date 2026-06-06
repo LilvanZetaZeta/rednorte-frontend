@@ -7,6 +7,7 @@ import Input from '../Input';
 import Modal from '../Modal';
 import BuscadorPacienteRut from '../molecules/BuscadorPacienteRut';
 import { normalizeRutForBackend } from '../../../utils/formatters';
+import { validations } from '../../../utils/validations';
 
 interface WizardReservaSecretariaProps {
   isOpen: boolean;
@@ -40,6 +41,16 @@ export default function WizardReservaSecretaria({ isOpen, centroId, onClose, onS
 
   const { data: usuarios = [] } = useGetUsuariosStaffQuery();
   const [crearReserva, { isLoading: creandoReserva }] = useCrearReservaMutation();
+
+  const minDateTime = useMemo(() => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }, []);
 
   const medicosDelCentro = useMemo<IUsuario[]>(() => {
     return usuarios.filter((u) => u.rol === 'MEDICO' && u.centroMedico?.id === centroId);
@@ -93,6 +104,11 @@ export default function WizardReservaSecretaria({ isOpen, centroId, onClose, onS
       setError('Complete tipo de reserva y horario.');
       return;
     }
+
+    if (new Date(fechaHora) < new Date()) {
+      setError('La fecha y hora de la reserva no puede estar en el pasado.');
+      return;
+    }
     
     // Validación condicional: Solo exigir médico si es consulta
     if (tipoReserva === 'CONSULTA_MEDICA' && !medicoId) {
@@ -100,9 +116,13 @@ export default function WizardReservaSecretaria({ isOpen, centroId, onClose, onS
       return;
     }
 
-    if (pacienteExiste === false && (!pacienteNombre.trim() || !pacienteCorreo.trim())) {
-      setError('Como el paciente no está registrado, complete nombre y correo obligatorios.');
-      return;
+    if (pacienteExiste === false) {
+      const nameErr = validations.fullName(pacienteNombre) || (!pacienteNombre.trim() ? 'El nombre es requerido' : null);
+      const emailErr = validations.email(pacienteCorreo) || (!pacienteCorreo.trim() ? 'El correo es requerido' : null);
+      if (nameErr || emailErr) {
+        setError('Por favor, corrija los errores en los datos del paciente (nombre o correo inválidos).');
+        return;
+      }
     }
 
     try {
@@ -238,7 +258,7 @@ export default function WizardReservaSecretaria({ isOpen, centroId, onClose, onS
             )}
 
             {/* 5. FECHA Y HORA (Aplica para todos) */}
-            <Input label="Fecha y hora *" type="datetime-local" value={fechaHora} onChange={(e) => setFechaHora(e.target.value)} />
+            <Input label="Fecha y hora *" type="datetime-local" min={minDateTime} value={fechaHora} onChange={(e) => setFechaHora(e.target.value)} />
           </div>
         )}
       </form>

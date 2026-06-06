@@ -44,6 +44,11 @@ export const useReservasVM = () => {
       return;
     }
 
+    if (new Date(fechaHora) < new Date()) {
+      setError('La fecha y hora de la reserva no puede estar en el pasado.');
+      return;
+    }
+
     try {
       await crear({ 
         pacienteId: perfil.pacienteId,

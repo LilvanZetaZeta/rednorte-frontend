@@ -6,6 +6,7 @@ import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import Toast from '../components/ui/Toast';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
+import { validations } from '../utils/validations';
 
 export default function GestionEspecialidades() {
   const { 
@@ -15,13 +16,20 @@ export default function GestionEspecialidades() {
   } = useGestionEspecialidadesVM();
 
   const [nombre, setNombre] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
   const [eliminarConfig, setEliminarConfig] = useState({ isOpen: false, id: 0, nombre: '' });
 
   useEffect(() => {
     if (editingEspecialidad) setNombre(editingEspecialidad.nombre);
     else setNombre('');
+    setError(null);
   }, [editingEspecialidad, isModalOpen]);
+
+  const handleNombreChange = (val: string) => {
+    setNombre(val);
+    setError(validations.specialtyName(val));
+  };
 
   const showMsg = (text: string, type: 'success' | 'error') => {
     setMessage({ text, type });
@@ -30,6 +38,12 @@ export default function GestionEspecialidades() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const err = validations.specialtyName(nombre);
+    setError(err);
+    if (err) {
+      showMsg('Por favor, corrige los errores en el formulario.', 'error');
+      return;
+    }
     const result = await handleSave(nombre);
     if (result && result.success === false) {
       showMsg(result.error || 'Error al guardar', 'error');
@@ -110,7 +124,13 @@ export default function GestionEspecialidades() {
         }
       >
         <form id="form-especialidad" onSubmit={handleSubmit} className="space-y-6">
-          <Input label="Nombre de la Especialidad *" required value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Ej: Cardiología" />
+          <Input 
+            label="Nombre de la Especialidad *" 
+            value={nombre} 
+            onChange={e => handleNombreChange(e.target.value)} 
+            error={error}
+            placeholder="Ej: Cardiología" 
+          />
         </form>
       </Modal>
     </div>

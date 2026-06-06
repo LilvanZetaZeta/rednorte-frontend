@@ -7,6 +7,7 @@ import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import Toast from '../components/ui/Toast';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
+import { validations } from '../utils/validations';
 
 export default function GestionCentros() {
   const {
@@ -18,6 +19,12 @@ export default function GestionCentros() {
   const { data: staff } = useGetUsuariosStaffQuery();
 
   const [formData, setFormData] = useState({ nombreSucursal: '', region: '', comuna: '', direccion: '' });
+  const [errors, setErrors] = useState<Record<string, string | null>>({
+    nombreSucursal: null,
+    region: null,
+    comuna: null,
+    direccion: null
+  });
   const [selectedAdminId, setSelectedAdminId] = useState<number | null>(null);
   const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
   const [eliminarConfig, setEliminarConfig] = useState({ isOpen: false, id: 0, nombre: '' });
@@ -46,7 +53,25 @@ export default function GestionCentros() {
       setFormData({ nombreSucursal: '', region: '', comuna: '', direccion: '' });
       setSelectedAdminId(null);
     }
+    setErrors({ nombreSucursal: null, region: null, comuna: null, direccion: null });
   }, [editingCentro, isModalOpen]);
+
+  const handleFieldChange = (field: keyof typeof formData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    
+    let error: string | null = null;
+    if (field === 'nombreSucursal') {
+      error = validations.text(value, 3, 'nombre de la sucursal');
+    } else if (field === 'region') {
+      error = validations.text(value, 3, 'región');
+    } else if (field === 'comuna') {
+      error = validations.text(value, 3, 'comuna');
+    } else if (field === 'direccion') {
+      error = validations.text(value, 5, 'dirección');
+    }
+    
+    setErrors(prev => ({ ...prev, [field]: error }));
+  };
 
   const showMsg = (text: string, type: 'success' | 'error') => {
     setMessage({ text, type });
@@ -55,6 +80,26 @@ export default function GestionCentros() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const nombreSucursalErr = validations.text(formData.nombreSucursal, 3, 'nombre de la sucursal');
+    const regionErr = validations.text(formData.region, 3, 'región');
+    const comunaErr = validations.text(formData.comuna, 3, 'comuna');
+    const direccionErr = validations.text(formData.direccion, 5, 'dirección');
+    
+    const newErrors = {
+      nombreSucursal: nombreSucursalErr,
+      region: regionErr,
+      comuna: comunaErr,
+      direccion: direccionErr
+    };
+    
+    setErrors(newErrors);
+    
+    if (Object.values(newErrors).some(err => err !== null)) {
+      showMsg('Por favor, corrige los errores en el formulario.', 'error');
+      return;
+    }
+
     const previousAdminId = currentAdmin?.id || null;
     const adminChanged = selectedAdminId !== previousAdminId;
     const newAdminId = adminChanged ? selectedAdminId : undefined;
@@ -156,12 +201,36 @@ export default function GestionCentros() {
         }
       >
         <form id="form-centro" onSubmit={handleSubmit} className="space-y-6">
-          <Input label="Nombre de la Sucursal *" required value={formData.nombreSucursal} onChange={e => setFormData({ ...formData, nombreSucursal: e.target.value })} placeholder="Ej: Clínica Norte Central" />
+          <Input 
+            label="Nombre de la Sucursal *" 
+            value={formData.nombreSucursal} 
+            onChange={e => handleFieldChange('nombreSucursal', e.target.value)} 
+            error={errors.nombreSucursal}
+            placeholder="Ej: Clínica Norte Central" 
+          />
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Región *" required value={formData.region} onChange={e => setFormData({ ...formData, region: e.target.value })} placeholder="Ej: Metropolitana" />
-            <Input label="Comuna *" required value={formData.comuna} onChange={e => setFormData({ ...formData, comuna: e.target.value })} placeholder="Ej: Santiago" />
+            <Input 
+              label="Región *" 
+              value={formData.region} 
+              onChange={e => handleFieldChange('region', e.target.value)} 
+              error={errors.region}
+              placeholder="Ej: Metropolitana" 
+            />
+            <Input 
+              label="Comuna *" 
+              value={formData.comuna} 
+              onChange={e => handleFieldChange('comuna', e.target.value)} 
+              error={errors.comuna}
+              placeholder="Ej: Santiago" 
+            />
           </div>
-          <Input label="Dirección Completa *" required value={formData.direccion} onChange={e => setFormData({ ...formData, direccion: e.target.value })} placeholder="Calle #123" />
+          <Input 
+            label="Dirección Completa *" 
+            value={formData.direccion} 
+            onChange={e => handleFieldChange('direccion', e.target.value)} 
+            error={errors.direccion}
+            placeholder="Calle #123" 
+          />
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-on-surface ml-1">Administrador a Cargo</label>
             <select
