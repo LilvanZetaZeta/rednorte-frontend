@@ -2,10 +2,21 @@ import { useNavigate } from 'react-router-dom';
 import { useReservasVM } from '../viewmodels/useReservasVM';
 import { ShieldPlus, ArrowLeft, Stethoscope, User, Building2 } from 'lucide-react';
 import Button from '../components/ui/Button';
+import { useMemo } from 'react';
 
 export default function Reservas() {
   const navigate = useNavigate();
   const vm = useReservasVM();
+
+  const minDateTime = useMemo(() => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }, []);
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col h-screen overflow-y-auto">
@@ -59,7 +70,7 @@ export default function Reservas() {
           {vm.medicoSelec && (
             <div className="bg-surface-container-lowest rounded-[32px] p-8 border border-outline-variant shadow-sm">
               <h2 className="text-2xl font-bold mb-6">4. Fecha y Hora</h2>
-              <input type="datetime-local" onChange={e => vm.setFechaHora(e.target.value)} className="w-full p-4 rounded-2xl bg-surface-container-high border-none outline-none mb-4" />
+              <input type="datetime-local" min={minDateTime} onChange={e => vm.setFechaHora(e.target.value)} className="w-full p-4 rounded-2xl bg-surface-container-high border-none outline-none mb-4" />
               {vm.error && <p className="text-error font-bold text-center mb-4">{vm.error}</p>}
               <Button onClick={vm.confirmarReserva} isLoading={vm.isSubmitting} className="w-full !text-xl">
                 Confirmar Cita Médica

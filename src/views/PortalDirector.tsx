@@ -5,15 +5,28 @@ import StatCard from '../components/ui/StatCard';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import Toast from '../components/ui/Toast';
+import { validations } from '../utils/validations';
 
 export default function PortalDirector() {
   const { userName, resumen, centros, isLoading, handleAsignarAdmin, isAssigning } = usePortalDirectorVM();
   const [email, setEmail] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
+
+  const handleEmailChange = (val: string) => {
+    setEmail(val);
+    setError(validations.email(val));
+  };
 
   const onAssign = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    const emailErr = validations.email(email) || (!email ? 'El correo es requerido' : null);
+    setError(emailErr);
+    if (emailErr) {
+      setMessage({ text: 'Por favor ingresa un correo válido.', type: 'error' });
+      setTimeout(() => setMessage(null), 5000);
+      return;
+    }
 
     const result = await handleAsignarAdmin(email);
     setMessage({ 
@@ -21,7 +34,10 @@ export default function PortalDirector() {
       type: result.success ? 'success' : 'error' 
     });
     
-    if (result.success) setEmail('');
+    if (result.success) {
+      setEmail('');
+      setError(null);
+    }
     setTimeout(() => setMessage(null), 5000);
   };
 
@@ -82,8 +98,8 @@ export default function PortalDirector() {
               type="email"
               placeholder="ejemplo@rednorte.cl"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
+              onChange={(e) => handleEmailChange(e.target.value)}
+              error={error}
             />
 
             {/* Uso del Button limpio */}

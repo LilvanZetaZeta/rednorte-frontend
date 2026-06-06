@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDashboardCentroVM } from '../viewmodels/useDashboardCentroVM';
 import {
   Building2, Users, Loader2, Pencil, Trash2, Search,
@@ -12,6 +12,7 @@ import Modal from '../components/ui/Modal';
 import Toast from '../components/ui/Toast';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
 import SpecialtiesModal from '../components/dashboard/SpecialtiesModal';
+import { validations } from '../utils/validations';
 
 export default function DashboardCentro() {
   const vm = useDashboardCentroVM();
@@ -28,6 +29,28 @@ export default function DashboardCentro() {
     setTimeout(() => setMessage(null), 6000);
   };
 
+  const [editErrors, setEditErrors] = useState<{ nombreCompleto: string | null; correo: string | null }>({
+    nombreCompleto: null,
+    correo: null
+  });
+
+  useEffect(() => {
+    if (!vm.showModal) {
+      setEditErrors({ nombreCompleto: null, correo: null });
+    }
+  }, [vm.showModal]);
+
+  const handleEditFieldChange = (field: 'nombreCompleto' | 'correo', val: string) => {
+    vm.setFormEdit(prev => ({ ...prev, [field]: val }));
+    let error: string | null = null;
+    if (field === 'nombreCompleto') {
+      error = validations.fullName(val);
+    } else if (field === 'correo') {
+      error = validations.email(val);
+    }
+    setEditErrors(prev => ({ ...prev, [field]: error }));
+  };
+
   const handleSubmitAsignar = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = await vm.handleAsignar();
@@ -37,6 +60,18 @@ export default function DashboardCentro() {
 
   const handleSubmitEdit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const nameErr = validations.fullName(vm.formEdit.nombreCompleto) || (!vm.formEdit.nombreCompleto ? 'El nombre completo es requerido' : null);
+    const emailErr = validations.email(vm.formEdit.correo) || (!vm.formEdit.correo ? 'El correo es requerido' : null);
+    
+    const errors = { nombreCompleto: nameErr, correo: emailErr };
+    setEditErrors(errors);
+    
+    if (nameErr || emailErr) {
+      showMsg({ text: 'Por favor, corrige los errores en el formulario.', type: 'error' });
+      return;
+    }
+
     const result = await vm.handleGuardarEdit();
     if (result.success) showMsg({ text: 'Datos actualizados correctamente.', type: 'success' });
     else showMsg({ text: result.error || 'Error al actualizar', type: 'error' });
@@ -323,17 +358,17 @@ export default function DashboardCentro() {
         <form id="edit-user-form" onSubmit={handleSubmitEdit} className="space-y-4">
           <Input
             label="Nombre Completo *"
-            required
             type="text"
             value={vm.formEdit.nombreCompleto}
-            onChange={e => vm.setFormEdit({ ...vm.formEdit, nombreCompleto: e.target.value })}
+            onChange={e => handleEditFieldChange('nombreCompleto', e.target.value)}
+            error={editErrors.nombreCompleto}
           />
           <Input
             label="Correo Electrónico *"
-            required
             type="email"
             value={vm.formEdit.correo}
-            onChange={e => vm.setFormEdit({ ...vm.formEdit, correo: e.target.value })}
+            onChange={e => handleEditFieldChange('correo', e.target.value)}
+            error={editErrors.correo}
           />
           
           {vm.editingUser?.rol === 'MEDICO' && (

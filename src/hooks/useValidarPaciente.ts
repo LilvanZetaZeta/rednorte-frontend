@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useLazyGetUsuarioPorRutQuery } from '../services/usuariosApi';
 import { normalizeRutForBackend } from '../utils/formatters';
+import { validations } from '../utils/validations';
 
 export const useValidarPaciente = () => {
   const [rut, setRut] = useState('');
@@ -17,6 +18,12 @@ export const useValidarPaciente = () => {
 
     if (!rutNormalizado) {
       setError('Ingrese un RUT válido para validar al paciente.');
+      return;
+    }
+
+    const rutError = validations.rut(rutNormalizado);
+    if (rutError) {
+      setError(rutError);
       return;
     }
 

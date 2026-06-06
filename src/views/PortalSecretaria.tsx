@@ -38,7 +38,33 @@ export default function PortalSecretaria() {
     if(res) showMsg(res.success ? res.message! : res.error!, res.success ? 'success' : 'error');
   };
 
+  const minDate = useMemo(() => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }, []);
+
   const onBloqueo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!vm.bloqueoData.medicoId) {
+      showMsg('Por favor seleccione un médico.', 'error');
+      return;
+    }
+    if (!vm.bloqueoData.fecha) {
+      showMsg('Por favor seleccione la fecha de la ausencia.', 'error');
+      return;
+    }
+    
+    const selectedDate = new Date(vm.bloqueoData.fecha + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (selectedDate < today) {
+      showMsg('La fecha de la ausencia no puede estar en el pasado.', 'error');
+      return;
+    }
+
     const res = await vm.handleBloqueoSubmit(e);
     if(res) showMsg(res.success ? res.message! : res.error!, res.success ? 'success' : 'error');
   };
@@ -204,7 +230,7 @@ export default function PortalSecretaria() {
               ))}
             </select>
           </div>
-          <Input label="Fecha de la Ausencia *" required type="date" value={vm.bloqueoData.fecha} onChange={e => vm.setBloqueoData({...vm.bloqueoData, fecha: e.target.value})} />
+          <Input label="Fecha de la Ausencia *" type="date" min={minDate} value={vm.bloqueoData.fecha} onChange={e => vm.setBloqueoData({...vm.bloqueoData, fecha: e.target.value})} />
         </form>
       </Modal>
     </div>

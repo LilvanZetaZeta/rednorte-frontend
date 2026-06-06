@@ -1,8 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Button from '../Button';
 import Input from '../Input';
 import { formatRut } from '../../../utils/formatters';
 import { useValidarPaciente } from '../../../hooks/useValidarPaciente';
+import { validations } from '../../../utils/validations';
 
 interface BuscadorPacienteRutProps {
   onPacienteValidado?: (data: { rut: string; nombre: string; correo: string; existe: boolean }) => void;
@@ -23,9 +24,38 @@ export default function BuscadorPacienteRut({ onPacienteValidado }: BuscadorPaci
     handleValidarRut,
   } = useValidarPaciente();
 
+  const [nombreError, setNombreError] = useState<string | null>(null);
+  const [correoError, setCorreoError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setNombreError(null);
+    setCorreoError(null);
+  }, [validado, pacienteExiste]);
+
+  useEffect(() => {
+    if (validado) {
+      onPacienteValidado?.({
+        rut,
+        nombre,
+        correo,
+        existe: pacienteExiste ?? false
+      });
+    }
+  }, [nombre, correo, rut, validado, pacienteExiste, onPacienteValidado]);
+
   const onValidar = async () => {
     const data = await handleValidarRut();
     if (data) onPacienteValidado?.(data);
+  };
+
+  const handleNombreChange = (val: string) => {
+    setNombre(val);
+    setNombreError(validations.fullName(val));
+  };
+
+  const handleCorreoChange = (val: string) => {
+    setCorreo(val);
+    setCorreoError(validations.email(val));
   };
 
   const resumen = useMemo(() => {
@@ -67,8 +97,21 @@ export default function BuscadorPacienteRut({ onPacienteValidado }: BuscadorPaci
 
       {validado && pacienteExiste === false && (
         <div className="space-y-3 rounded-2xl border border-blue-100 bg-blue-50 p-4">
-          <Input label="Nombre completo *" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Nombre del paciente" />
-          <Input label="Correo electrónico *" type="email" value={correo} onChange={(e) => setCorreo(e.target.value)} placeholder="paciente@correo.cl" />
+          <Input 
+            label="Nombre completo *" 
+            value={nombre} 
+            onChange={(e) => handleNombreChange(e.target.value)} 
+            error={nombreError}
+            placeholder="Nombre del paciente" 
+          />
+          <Input 
+            label="Correo electrónico *" 
+            type="email" 
+            value={correo} 
+            onChange={(e) => handleCorreoChange(e.target.value)} 
+            error={correoError}
+            placeholder="paciente@correo.cl" 
+          />
         </div>
       )}
     </div>
