@@ -13,14 +13,14 @@ export const reasignacionesApi = apiGateway.injectEndpoints({
         
         // GET: Obtener ofertas pendientes
         obtenerOfertas: builder.query<OfertaReasignacion[], string | number>({
-            query: (pacienteId) => `/api/reasignaciones/paciente/${pacienteId}`,
+            query: (pacienteId) => `/reasignaciones/paciente/${pacienteId}`,
             providesTags: ['Reasignaciones'],
         }),
 
         // PATCH: Responder a la oferta
         responderOferta: builder.mutation<OfertaReasignacion, { ofertaId: number; estado: 'ACEPTADA' | 'RECHAZADA' }>({
             query: ({ ofertaId, estado }) => ({
-                url: `/api/reasignaciones/${ofertaId}`,
+                url: `/reasignaciones/${ofertaId}`,
                 method: 'PATCH',
                 body: { estado },
             }),
