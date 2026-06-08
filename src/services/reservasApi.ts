@@ -77,6 +77,10 @@ export const reservasApi = apiGateway.injectEndpoints({
       query: (reservaId) => `/portal/historial-citas/reserva/${reservaId}`,
       providesTags: ['Reservas'],
     }),
+    obtenerHistorialPorPaciente: builder.query<IHistorialCita[], number>({
+      query: (pacienteId) => `/portal/historial-citas/paciente/${pacienteId}`,
+      providesTags: ['Reservas'],
+    }),
   }),
 });
 
@@ -89,5 +93,7 @@ export const {
   useActualizarEstadoReservaMutation,
   useBloquearAgendaMedicoMutation,
   useGuardarEvolucionClinicaMutation,
-  useObtenerHistorialPorReservaQuery
+  useObtenerHistorialPorReservaQuery,
+  useObtenerHistorialPorPacienteQuery,
+  useLazyObtenerHistorialPorPacienteQuery
 } = reservasApi;

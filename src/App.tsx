@@ -16,6 +16,7 @@ const GestionCentros = lazy(() => import('./views/GestionCentros'));
 const GestionEspecialidades = lazy(() => import('./views/GestionEspecialidades'));
 const Reservas = lazy(() => import('./views/Reservas'));
 const DashboardCentro = lazy(() => import('./views/DashboardCentro'));
+const BuscarHistorialDoctor = lazy(() => import('./views/BuscarHistorialDoctor'));
 
 export default function App() {
   const { session, isInitializing, isLoading } = useAuthVM();
@@ -51,6 +52,7 @@ export default function App() {
         <Route element={<Layout />}>
           <Route path="/portal" element={<ProtectedRoute allowedRoles={['PACIENTE']}><PortalPaciente /></ProtectedRoute>} />
           <Route path="/doctor/agenda" element={<ProtectedRoute allowedRoles={['MEDICO']}><PortalDoctor /></ProtectedRoute>} />
+          <Route path="/doctor/historial" element={<ProtectedRoute allowedRoles={['MEDICO']}><BuscarHistorialDoctor /></ProtectedRoute>} />
           <Route path="/ops" element={<ProtectedRoute allowedRoles={['SECRETARIA']}><PortalSecretaria /></ProtectedRoute>} />
           <Route path="/admin/centro" element={<ProtectedRoute allowedRoles={['ADMINISTRATIVO']}><DashboardCentro /></ProtectedRoute>} />
           
