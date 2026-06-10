@@ -110,8 +110,8 @@ export default function WizardReservaSecretaria({ isOpen, centroId, onClose, onS
       return;
     }
     
-    // Validación condicional: Solo exigir médico si es consulta
-    if (tipoReserva === 'CONSULTA_MEDICA' && !medicoId) {
+    // Se exige médico para todos los tipos de reserva ya que el backend lo requiere como obligatorio (not null).
+    if (!medicoId) {
       setError('Seleccione un médico disponible.');
       return;
     }
@@ -126,7 +126,7 @@ export default function WizardReservaSecretaria({ isOpen, centroId, onClose, onS
     }
 
     try {
-      const medicoIdParaReserva = tipoReserva === 'CONSULTA_MEDICA' ? Number(medicoId || 0) : 0;
+      const medicoIdParaReserva = Number(medicoId);
 
       await crearReserva({
         pacienteRut: normalizeRutForBackend(pacienteRut),
@@ -186,29 +186,25 @@ export default function WizardReservaSecretaria({ isOpen, centroId, onClose, onS
               </select>
             </div>
 
-            {/* 2. RENDERIZADO CONDICIONAL: CONSULTA MÉDICA */}
-            {tipoReserva === 'CONSULTA_MEDICA' && (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-on-surface ml-1 mb-1">Especialidad</label>
-                    <select value={especialidadId} onChange={(e) => setEspecialidadId(e.target.value)} className="w-full rounded-2xl bg-surface-container-high px-4 py-3.5 text-sm outline-none focus:ring-2 focus:ring-primary">
-                      <option value="">Todas</option>
-                      {especialidadesDisponibles.map((esp) => <option key={esp.id} value={esp.id}>{esp.nombre}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-on-surface ml-1 mb-1">Médico *</label>
-                    <select value={medicoId} onChange={(e) => setMedicoId(e.target.value)} className="w-full rounded-2xl bg-surface-container-high px-4 py-3.5 text-sm outline-none focus:ring-2 focus:ring-primary">
-                      <option value="">Seleccione un médico disponible</option>
-                      {doctoresFiltrados.map((medico) => (
-                        <option key={medico.id} value={medico.id}>{medico.nombreCompleto} — {medico.especialidades?.[0]?.nombre || 'General'}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </>
-            )}
+            {/* 2. ESPECIALIDAD Y MÉDICO (Requerido para todos los tipos de reserva) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-on-surface ml-1 mb-1">Especialidad</label>
+                <select value={especialidadId} onChange={(e) => setEspecialidadId(e.target.value)} className="w-full rounded-2xl bg-surface-container-high px-4 py-3.5 text-sm outline-none focus:ring-2 focus:ring-primary">
+                  <option value="">Todas</option>
+                  {especialidadesDisponibles.map((esp) => <option key={esp.id} value={esp.id}>{esp.nombre}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-on-surface ml-1 mb-1">Médico *</label>
+                <select value={medicoId} onChange={(e) => setMedicoId(e.target.value)} className="w-full rounded-2xl bg-surface-container-high px-4 py-3.5 text-sm outline-none focus:ring-2 focus:ring-primary">
+                  <option value="">Seleccione un médico disponible</option>
+                  {doctoresFiltrados.map((medico) => (
+                    <option key={medico.id} value={medico.id}>{medico.nombreCompleto} — {medico.especialidades?.[0]?.nombre || 'General'}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
             {/* 3. RENDERIZADO CONDICIONAL: EXÁMENES */}
             {tipoReserva === 'EXAMEN_IMAGENOLOGIA' && (
