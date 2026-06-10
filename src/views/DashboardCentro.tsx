@@ -17,7 +17,7 @@ import { validations } from '../utils/validations';
 export default function DashboardCentro() {
   const vm = useDashboardCentroVM();
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
-  
+
   const [eliminarConfig, setEliminarConfig] = useState<{ isOpen: boolean; id: number; nombre: string }>({
     isOpen: false,
     id: 0,
@@ -60,13 +60,13 @@ export default function DashboardCentro() {
 
   const handleSubmitEdit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const nameErr = validations.fullName(vm.formEdit.nombreCompleto) || (!vm.formEdit.nombreCompleto ? 'El nombre completo es requerido' : null);
     const emailErr = validations.email(vm.formEdit.correo) || (!vm.formEdit.correo ? 'El correo es requerido' : null);
-    
+
     const errors = { nombreCompleto: nameErr, correo: emailErr };
     setEditErrors(errors);
-    
+
     if (nameErr || emailErr) {
       showMsg({ text: 'Por favor, corrige los errores en el formulario.', type: 'error' });
       return;
@@ -118,7 +118,7 @@ export default function DashboardCentro() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700 max-w-7xl mx-auto pb-10">
-      
+
       {message && <Toast message={message.text} type={message.type} />}
 
       {/* HEADER */}
@@ -143,7 +143,7 @@ export default function DashboardCentro() {
 
       {/* GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
+
         {/* PANEL ASIGNAR */}
         <div className="lg:col-span-1">
           <form
@@ -175,9 +175,8 @@ export default function DashboardCentro() {
                       key={u.id}
                       type="button"
                       onClick={() => { vm.setFormAsignar({ ...vm.formAsignar, usuarioId: u.id }); vm.setBusqueda(u.nombreCompleto); }}
-                      className={`w-full text-left px-4 py-3 flex flex-col gap-0.5 hover:bg-surface-container-low transition-colors border-b border-outline-variant/30 last:border-0 ${
-                        vm.formAsignar.usuarioId === u.id ? 'bg-primary-container' : ''
-                      }`}
+                      className={`w-full text-left px-4 py-3 flex flex-col gap-0.5 hover:bg-surface-container-low transition-colors border-b border-outline-variant/30 last:border-0 ${vm.formAsignar.usuarioId === u.id ? 'bg-primary-container' : ''
+                        }`}
                     >
                       <span className="text-sm font-medium text-on-surface">{u.nombreCompleto}</span>
                       <span className="text-xs text-on-surface-variant">{u.correo}</span>
@@ -272,17 +271,15 @@ export default function DashboardCentro() {
                 {vm.staffDelCentro.map(u => (
                   <div key={u.id} className="p-5 flex items-start justify-between gap-4 hover:bg-surface-container-low/60 transition-colors group">
                     <div className="flex items-start gap-4 min-w-0">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${
-                        u.rol === 'MEDICO' ? 'bg-primary-container text-on-primary-container' : 'bg-secondary-container text-on-secondary-container'
-                      }`}>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${u.rol === 'MEDICO' ? 'bg-primary-container text-on-primary-container' : 'bg-secondary-container text-on-secondary-container'
+                        }`}>
                         {getInitials(u.nombreCompleto)}
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap mb-0.5">
                           <span className="font-medium text-on-surface text-sm">{u.nombreCompleto}</span>
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${
-                            u.rol === 'MEDICO' ? 'bg-primary-container text-on-primary-container' : 'bg-secondary-container text-on-secondary-container'
-                          }`}>
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${u.rol === 'MEDICO' ? 'bg-primary-container text-on-primary-container' : 'bg-secondary-container text-on-secondary-container'
+                            }`}>
                             {u.rol === 'MEDICO' ? 'Médico' : 'Secretaria'}
                           </span>
                         </div>
@@ -370,15 +367,15 @@ export default function DashboardCentro() {
             onChange={e => handleEditFieldChange('correo', e.target.value)}
             error={editErrors.correo}
           />
-          
+
           {vm.editingUser?.rol === 'MEDICO' && (
             <div className="space-y-2 p-4 bg-surface-container-high rounded-2xl">
               <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wide">Especialidades</label>
               <div className="space-y-1 max-h-44 overflow-y-auto pr-1">
                 {vm.especialidades.map(esp => (
                   <label key={esp.id} className="flex items-center gap-3 p-2 cursor-pointer rounded-xl hover:bg-surface-container transition-colors">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={vm.formEdit.especialidadIds.includes(esp.id)}
                       onChange={() => vm.toggleEspecialidad(esp.id, 'edit')}
                       className="w-4 h-4 accent-primary"

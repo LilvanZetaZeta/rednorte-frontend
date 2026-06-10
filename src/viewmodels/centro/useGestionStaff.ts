@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
-import { 
-  useGetUsuariosStaffQuery, 
-  useGetTodosUsuariosQuery,
+import {
+  useGetUsuariosStaffQuery,
+  useGetCandidatosStaffQuery,
   useUpdateUsuarioCentroMutation,
   useUpdateUsuarioEspecialidadesMutation,
   useEliminarUsuarioMutation,
@@ -25,24 +25,24 @@ export interface IFormEdit {
 
 export const useGestionStaff = (miCentroId: number | null) => {
   const { data: todosStaff, isLoading: loadingS, refetch: refetchStaff } = useGetUsuariosStaffQuery();
-  const { data: todosUsuarios } = useGetTodosUsuariosQuery();
+  const { data: candidatos = [] } = useGetCandidatosStaffQuery();
   const { data: especialidades } = useGetEspecialidadesQuery();
 
-  const [updateCentro]         = useUpdateUsuarioCentroMutation();
+  const [updateCentro] = useUpdateUsuarioCentroMutation();
   const [updateEspecialidades] = useUpdateUsuarioEspecialidadesMutation();
-  const [eliminarUsuario]      = useEliminarUsuarioMutation();
-  const [patchUsuario]         = usePatchUsuarioMutation();
-  const [updateRol]            = useUpdateUsuarioRolMutation();
+  const [eliminarUsuario] = useEliminarUsuarioMutation();
+  const [patchUsuario] = usePatchUsuarioMutation();
+  const [updateRol] = useUpdateUsuarioRolMutation();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showModal,    setShowModal]    = useState(false);
-  const [editingUser,  setEditingUser]  = useState<IUsuario | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [editingUser, setEditingUser] = useState<IUsuario | null>(null);
   const [busqueda, setBusqueda] = useState('');
 
   const [formAsignar, setFormAsignar] = useState<IFormAsignar>({
     usuarioId: null, rol: 'SECRETARIA', especialidadIds: [],
   });
-  
+
   const [formEdit, setFormEdit] = useState<IFormEdit>({
     nombreCompleto: '', correo: '', especialidadIds: [],
   });
@@ -88,12 +88,6 @@ export const useGestionStaff = (miCentroId: number | null) => {
     );
   }, [todosStaff, miCentroId]);
 
-  const candidatos = useMemo(() => {
-    if (!todosUsuarios) return [];
-    const idsStaff = new Set(staffDelCentro.map(u => u.id));
-    return todosUsuarios.filter(u => !idsStaff.has(u.id));
-  }, [todosUsuarios, staffDelCentro]);
-
   const candidatosFiltrados = useMemo(() => {
     if (!busqueda.trim()) return candidatos;
     const q = busqueda.toLowerCase();
@@ -105,11 +99,11 @@ export const useGestionStaff = (miCentroId: number | null) => {
   const toggleEspecialidad = (id: number, mode: 'asignar' | 'edit') => {
     const toggle = (ids: number[]) => ids.includes(id) ? ids.filter(e => e !== id) : [...ids, id];
     if (mode === 'asignar') setFormAsignar(p => ({ ...p, especialidadIds: toggle(p.especialidadIds) }));
-    else                    setFormEdit(p   => ({ ...p, especialidadIds: toggle(p.especialidadIds) }));
+    else setFormEdit(p => ({ ...p, especialidadIds: toggle(p.especialidadIds) }));
   };
 
   const handleAsignar = async (): Promise<{ success: boolean; error?: string }> => {
-    if (!miCentroId)          return { success: false, error: 'Tu cuenta no tiene un centro médico asignado.' };
+    if (!miCentroId) return { success: false, error: 'Tu cuenta no tiene un centro médico asignado.' };
     if (!formAsignar.usuarioId) return { success: false, error: 'Selecciona un usuario de la lista.' };
     if (formAsignar.rol === 'MEDICO' && formAsignar.especialidadIds.length === 0)
       return { success: false, error: 'Debes seleccionar al menos una especialidad para el médico.' };
@@ -119,11 +113,11 @@ export const useGestionStaff = (miCentroId: number | null) => {
       const id = formAsignar.usuarioId;
       await updateRol({ id, rol: formAsignar.rol }).unwrap();
       await updateCentro({ id, centroId: miCentroId }).unwrap();
-      
+
       if (formAsignar.rol === 'MEDICO') {
         await updateEspecialidades({ id, especialidadIds: formAsignar.especialidadIds }).unwrap();
       }
-      
+
       refetchStaff();
       setFormAsignar({ usuarioId: null, rol: 'SECRETARIA', especialidadIds: [] });
       setBusqueda('');
@@ -139,7 +133,7 @@ export const useGestionStaff = (miCentroId: number | null) => {
     setEditingUser(u);
     setFormEdit({
       nombreCompleto: u.nombreCompleto,
-      correo:         u.correo,
+      correo: u.correo,
       especialidadIds: u.especialidades?.map(e => e.id) ?? [],
     });
     setShowModal(true);
@@ -175,24 +169,24 @@ export const useGestionStaff = (miCentroId: number | null) => {
   };
 
   return {
-    staffDelCentro, 
-    candidatosFiltrados, 
+    staffDelCentro,
+    candidatosFiltrados,
     especialidades: especialidades ?? [],
-    loadingS, 
-    isSubmitting, 
-    busqueda, 
+    loadingS,
+    isSubmitting,
+    busqueda,
     setBusqueda,
-    formAsignar, 
-    setFormAsignar, 
-    formEdit, 
+    formAsignar,
+    setFormAsignar,
+    formEdit,
     setFormEdit,
-    editingUser, 
-    showModal, 
-    setShowModal, 
+    editingUser,
+    showModal,
+    setShowModal,
     toggleEspecialidad,
-    handleAsignar, 
-    handleOpenEdit, 
-    handleGuardarEdit, 
+    handleAsignar,
+    handleOpenEdit,
+    handleGuardarEdit,
     handleEliminar,
     editingDoctorForEsp,
     selectedEspIds,
