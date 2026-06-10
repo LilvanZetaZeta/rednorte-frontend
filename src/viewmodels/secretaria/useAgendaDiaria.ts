@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import { useActualizarEstadoReservaMutation, useCancelarReservaMutation } from '../../services/reservasApi';
 import type { IReserva } from '../../models/types';
 
@@ -27,7 +27,7 @@ export const useAgendaDiaria = (reservas: IReserva[] | undefined) => {
     { label: 'Canceladas', value: reservasHoy.filter(r => r.estado === 'CANCELADA' || r.estado === 'PENDIENTE_CANCELACION_ADMIN').length, sub: 'hoy' }
   ], [reservasHoy, llegadasPendientes]);
 
-  const handleCheckIn = useCallback(async () => {
+  const handleCheckIn = async () => {
     if (!rutBusqueda) return { success: false, error: "Ingrese un RUT para procesar" };
     const reserva = llegadasPendientes.find(r => r.paciente.rut === rutBusqueda);
     if (!reserva) return { success: false, error: "El paciente no tiene citas vigentes programadas para hoy." };
@@ -39,25 +39,25 @@ export const useAgendaDiaria = (reservas: IReserva[] | undefined) => {
     } catch (error) {
       return { success: false, error: "Error al confirmar la cita." };
     }
-  }, [rutBusqueda, llegadasPendientes, actualizarEstado]);
+  };
 
-  const handleCancelarCita = useCallback(async (reservaId: number) => {
+  const handleCancelarCita = async (reservaId: number) => {
     try {
       await cancelarReservaBackend(reservaId).unwrap();
       return { success: true, message: "Operación de cancelación procesada exitosamente." };
     } catch (error: any) {
       return { success: false, error: error?.data?.error || "Error al procesar la cancelación." };
     }
-  }, [cancelarReservaBackend]);
+  };
 
-  const handleMarcarInasistencia = useCallback(async (id: number) => {
+  const handleMarcarInasistencia = async (id: number) => {
     try {
       await actualizarEstado({ id, estado: 'NO_ASISTE' }).unwrap();
       return { success: true, message: "Inasistencia registrada correctamente." };
     } catch (error) {
       return { success: false, error: "Error al actualizar la cita." };
     }
-  }, [actualizarEstado]);
+  };
 
   return {
     rutBusqueda,
