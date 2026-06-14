@@ -55,6 +55,22 @@ export const validations = {
       return 'Por favor ingresa un teléfono válido (9-15 números)';
     return null;
   },
+
+  text: (value: string, minLength: number, fieldName: string): string | null => {
+    if (!value || value.trim().length === 0) return `El ${fieldName} es requerido`;
+    if (value.trim().length < minLength) return `El ${fieldName} debe tener al menos ${minLength} caracteres`;
+    if (!/[a-zA-ZáéíóúñüÁÉÍÓÚÑÜ]/.test(value)) return `El ${fieldName} debe contener al menos una letra`;
+    return null;
+  },
+
+  specialtyName: (value: string): string | null => {
+    if (!value || value.trim().length === 0) return 'El nombre de la especialidad es requerido';
+    if (value.length < 3) return 'El nombre debe tener al menos 3 caracteres';
+    if (value.length > 50) return 'El nombre no puede exceder 50 caracteres';
+    if (!/^[a-záéíóúñüA-ZÁÉÍÓÚÑÜ\s]+$/.test(value)) 
+      return 'El nombre solo puede contener letras y espacios';
+    return null;
+  },
 };
 
 export const calculateRutVerifier = (rutNumber: string): string => {

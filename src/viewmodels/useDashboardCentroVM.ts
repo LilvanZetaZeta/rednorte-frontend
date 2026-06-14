@@ -1,33 +1,24 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../config/supabaseClient';
-import { useGetResumenQuery } from '../services/metricasApi';
-import { useObtenerReservasPorCentroQuery } from '../services/reservasApi';
+import { useAuthCentro } from './centro/useAuthCentro';
+import { useGestionStaff } from './centro/useGestionStaff';
+import { useEstadisticasCentro } from './centro/useEstadisticasCentro';
 
 export const useDashboardCentroVM = () => {
-  const [miCentroId, setMiCentroId] = useState<number | null>(null);
+  // 1. Obtenemos la sesión del administrador
+  const authCentro = useAuthCentro();
+  
+  // 2. Pasamos el ID del centro a la gestión de personal
+  const gestionStaff = useGestionStaff(authCentro.miCentroId);
+  
+  // 3. Pasamos el ID del centro y el personal filtrado a las estadísticas
+  const estadisticas = useEstadisticasCentro(authCentro.miCentroId, gestionStaff.staffDelCentro);
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const centroId = session?.user?.user_metadata?.centro_id;
-      if (centroId) setMiCentroId(Number(centroId));
-    });
-  }, []);
-
-  const { data: resumen, isLoading: loadingMetricas } = useGetResumenQuery();
-  const { data: agendaCentro, isLoading: loadingAgenda } = useObtenerReservasPorCentroQuery(
-    miCentroId!, 
-    { skip: !miCentroId } 
-  );
-
-  const reservasCanceladas = agendaCentro?.filter(r => r.estado === 'CANCELADA').length || 0;
-  const reservasAtendidas = agendaCentro?.filter(r => r.estado === 'ATENDIDO').length || 0;
-  const pacientesTotales = agendaCentro?.length || 0;
-
+  // 4. Retornamos la unión de todas las propiedades para la vista
   return {
-    miCentroId,
-    resumenGlobal: resumen,
-    agendaCentro,
-    metricasLocales: { pacientesTotales, reservasCanceladas, reservasAtendidas },
-    isLoading: loadingMetricas || loadingAgenda
+    ...authCentro,
+    ...gestionStaff,
+    ...estadisticas,
+    
+    // Unificamos el estado de carga global
+    isLoading: authCentro.loadingPerfil || gestionStaff.loadingS || estadisticas.loadingR,
   };
 };

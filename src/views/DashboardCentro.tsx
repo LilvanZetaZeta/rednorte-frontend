@@ -1,71 +1,410 @@
-import { useState } from 'react';
-import { Building2, Activity, UserPlus, Users, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useDashboardCentroVM } from '../viewmodels/useDashboardCentroVM';
+import {
+  Building2, Users, Loader2, Pencil, Trash2, Search,
+  Stethoscope, ClipboardList, CalendarCheck2, UserCheck, CheckCircle2,
+  Plus
+} from 'lucide-react';
+import StatCard from '../components/ui/StatCard';
+import Input from '../components/ui/Input';
+import Button from '../components/ui/Button';
+import Modal from '../components/ui/Modal';
+import Toast from '../components/ui/Toast';
+import ConfirmDialog from '../components/ui/ConfirmDialog';
+import SpecialtiesModal from '../components/dashboard/SpecialtiesModal';
+import { validations } from '../utils/validations';
 
 export default function DashboardCentro() {
-  const misCentros = [{ id: 1, nombre: "Sucursal Central" }]; 
-  
-  const [nuevoStaff, setNuevoStaff] = useState({ nombre: '', correo: '', rol: 'SECRETARIA', centroId: misCentros[0].id });
-  const [isCreating, setIsCreating] = useState(false);
+  const vm = useDashboardCentroVM();
+  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
-  const handleCrearStaffLocal = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsCreating(true);
-    setTimeout(() => {
-      alert(`Usuario ${nuevoStaff.nombre} creado y asignado al centro exitosamente.`);
-      setNuevoStaff({ nombre: '', correo: '', rol: 'SECRETARIA', centroId: misCentros[0].id });
-      setIsCreating(false);
-    }, 1000);
+  const [eliminarConfig, setEliminarConfig] = useState<{ isOpen: boolean; id: number; nombre: string }>({
+    isOpen: false,
+    id: 0,
+    nombre: ''
+  });
+
+  const showMsg = (msg: { text: string; type: 'success' | 'error' }) => {
+    setMessage(msg);
+    setTimeout(() => setMessage(null), 6000);
   };
+
+  const [editErrors, setEditErrors] = useState<{ nombreCompleto: string | null; correo: string | null }>({
+    nombreCompleto: null,
+    correo: null
+  });
+
+  useEffect(() => {
+    if (!vm.showModal) {
+      setEditErrors({ nombreCompleto: null, correo: null });
+    }
+  }, [vm.showModal]);
+
+  const handleEditFieldChange = (field: 'nombreCompleto' | 'correo', val: string) => {
+    vm.setFormEdit(prev => ({ ...prev, [field]: val }));
+    let error: string | null = null;
+    if (field === 'nombreCompleto') {
+      error = validations.fullName(val);
+    } else if (field === 'correo') {
+      error = validations.email(val);
+    }
+    setEditErrors(prev => ({ ...prev, [field]: error }));
+  };
+
+  const handleSubmitAsignar = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const result = await vm.handleAsignar();
+    if (result.success) showMsg({ text: 'Usuario asignado al equipo correctamente.', type: 'success' });
+    else showMsg({ text: result.error || 'Error al asignar', type: 'error' });
+  };
+
+  const handleSubmitEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const nameErr = validations.fullName(vm.formEdit.nombreCompleto) || (!vm.formEdit.nombreCompleto ? 'El nombre completo es requerido' : null);
+    const emailErr = validations.email(vm.formEdit.correo) || (!vm.formEdit.correo ? 'El correo es requerido' : null);
+
+    const errors = { nombreCompleto: nameErr, correo: emailErr };
+    setEditErrors(errors);
+
+    if (nameErr || emailErr) {
+      showMsg({ text: 'Por favor, corrige los errores en el formulario.', type: 'error' });
+      return;
+    }
+
+    const result = await vm.handleGuardarEdit();
+    if (result.success) showMsg({ text: 'Datos actualizados correctamente.', type: 'success' });
+    else showMsg({ text: result.error || 'Error al actualizar', type: 'error' });
+  };
+
+  // 1. Al apretar el botón del basurero, solo abrimos el modal, NO eliminamos aún.
+  const intentarEliminar = (id: number, nombre: string) => {
+    setEliminarConfig({ isOpen: true, id, nombre });
+  };
+
+  // 2. Esta función se ejecuta solo si el usuario aprieta "Eliminar" en el modal.
+  const confirmarEliminacion = async () => {
+    const result = await vm.handleEliminar(eliminarConfig.id);
+    if (result.success) {
+      showMsg({ text: `${eliminarConfig.nombre} fue removido del equipo.`, type: 'success' });
+    } else {
+      showMsg({ text: result.error || 'Error al eliminar', type: 'error' });
+    }
+    setEliminarConfig({ isOpen: false, id: 0, nombre: '' }); // Cerramos el modal
+  };
+
+  const getInitials = (nombre: string) =>
+    nombre.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+
+  if (vm.isLoading) {
+    return (
+      <div className="p-12 text-center text-primary flex flex-col items-center gap-4">
+        <Loader2 className="w-8 h-8 animate-spin" />
+        Cargando panel de administración...
+      </div>
+    );
+  }
+
+  if (!vm.miCentroId) {
+    return (
+      <div className="p-16 text-center flex flex-col items-center gap-4">
+        <h2 className="font-h2 text-h2 text-on-background">Sin centro médico asignado</h2>
+        <p className="text-on-surface-variant max-w-sm">
+          Tu cuenta de administrador aún no tiene una sucursal asignada. Contacta al Director.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700 max-w-7xl mx-auto pb-10">
-      <section className="flex justify-between items-center bg-white p-8 rounded-3xl border border-outline-variant shadow-sm">
+
+      {message && <Toast message={message.text} type={message.type} />}
+
+      {/* HEADER */}
+      <section className="flex justify-between items-end">
         <div>
           <h1 className="font-h1 text-h1 text-on-background mb-1">Gerencia de Sucursal</h1>
-          <p className="text-on-surface-variant">Administración local y contratación de personal.</p>
+          <p className="text-on-surface-variant">Administrador {vm.adminName}</p>
         </div>
-        <div className="w-16 h-16 bg-secondary-container text-secondary rounded-2xl flex items-center justify-center">
-          <Building2 size={32} />
+        <div className="flex items-center gap-2 px-4 py-2 bg-surface-container-high rounded-full border border-outline-variant">
+          <Building2 className="w-4 h-4 text-secondary" />
+          <span className="text-sm font-bold text-on-surface-variant">{vm.nombreCentro || `Centro #${vm.miCentroId}`}</span>
         </div>
       </section>
 
+      {/* KPI */}
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard title="Total Reservas" value={vm.metricas.totalReservas} icon={<ClipboardList />} colorClass="bg-primary-container text-on-primary-container" />
+        <StatCard title="Citas Vigentes" value={vm.metricas.vigentes} icon={<CalendarCheck2 />} colorClass="bg-secondary-container text-on-secondary-container" />
+        <StatCard title="Médicos" value={vm.metricas.medicos} icon={<Stethoscope />} colorClass="bg-tertiary-container text-on-tertiary-container" />
+        <StatCard title="Secretarias" value={vm.metricas.secretarias} icon={<Users />} colorClass="bg-primary-container text-on-primary-container" />
+      </section>
+
+      {/* GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* FORMULARIO DE CONTRATACIÓN LOCAL */}
+
+        {/* PANEL ASIGNAR */}
         <div className="lg:col-span-1">
-          <form onSubmit={handleCrearStaffLocal} className="bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant shadow-sm flex flex-col gap-4 sticky top-24">
-            <h2 className="font-h3 text-h3 flex items-center gap-2 mb-4"><UserPlus className="text-primary"/> Ingresar Personal</h2>
-            
-            <input required type="text" placeholder="Nombre Completo" value={nuevoStaff.nombre} onChange={e => setNuevoStaff({...nuevoStaff, nombre: e.target.value})} className="px-4 py-3 rounded-xl bg-surface-container-high border-none outline-none text-sm" />
-            <input required type="email" placeholder="Correo electrónico" value={nuevoStaff.correo} onChange={e => setNuevoStaff({...nuevoStaff, correo: e.target.value})} className="px-4 py-3 rounded-xl bg-surface-container-high border-none outline-none text-sm" />
-            
-            <select value={nuevoStaff.rol} onChange={e => setNuevoStaff({...nuevoStaff, rol: e.target.value})} className="px-4 py-3 rounded-xl bg-surface-container-high border-none outline-none text-sm font-bold">
-              <option value="SECRETARIA">Secretaria (Operaciones)</option>
-              <option value="MEDICO">Médico (Clínico)</option>
-            </select>
+          <form
+            onSubmit={handleSubmitAsignar}
+            className="bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant shadow-sm flex flex-col gap-4 sticky top-24"
+          >
+            <h2 className="font-h3 text-h3 flex items-center gap-2 mb-1">
+              <UserCheck className="text-primary w-5 h-5" /> Asignar al Equipo
+            </h2>
 
-            <select value={nuevoStaff.centroId} onChange={e => setNuevoStaff({...nuevoStaff, centroId: Number(e.target.value)})} className="px-4 py-3 rounded-xl bg-surface-container-high border-none outline-none text-sm">
-              {misCentros.map(c => <option key={c.id} value={c.id}>Destino: {c.nombre}</option>)}
-            </select>
+            {/* Buscador */}
+            <Input
+              label="Buscar usuario *"
+              type="text"
+              placeholder="Nombre o correo..."
+              iconLeft={<Search className="w-4 h-4" />}
+              value={vm.busqueda}
+              onChange={e => { vm.setBusqueda(e.target.value); vm.setFormAsignar({ ...vm.formAsignar, usuarioId: null }); }}
+            />
 
-            <button disabled={isCreating} type="submit" className="mt-4 bg-primary text-on-primary py-3.5 rounded-xl font-bold flex items-center justify-center gap-2">
-              {isCreating ? <Loader2 className="animate-spin w-5 h-5"/> : 'Registrar en Sucursal'}
-            </button>
+            {/* Lista de candidatos */}
+            {vm.busqueda.trim() && (
+              <div className="rounded-2xl border border-outline-variant overflow-hidden max-h-52 overflow-y-auto">
+                {vm.candidatosFiltrados.length === 0 ? (
+                  <p className="p-4 text-sm text-on-surface-variant text-center">Sin resultados</p>
+                ) : (
+                  vm.candidatosFiltrados.map(u => (
+                    <button
+                      key={u.id}
+                      type="button"
+                      onClick={() => { vm.setFormAsignar({ ...vm.formAsignar, usuarioId: u.id }); vm.setBusqueda(u.nombreCompleto); }}
+                      className={`w-full text-left px-4 py-3 flex flex-col gap-0.5 hover:bg-surface-container-low transition-colors border-b border-outline-variant/30 last:border-0 ${vm.formAsignar.usuarioId === u.id ? 'bg-primary-container' : ''
+                        }`}
+                    >
+                      <span className="text-sm font-medium text-on-surface">{u.nombreCompleto}</span>
+                      <span className="text-xs text-on-surface-variant">{u.correo}</span>
+                      <span className="text-xs text-on-surface-variant/60">{u.rol}</span>
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
+
+            {vm.formAsignar.usuarioId && (
+              <p className="text-xs text-primary font-medium flex items-center gap-1 ml-1">
+                <CheckCircle2 className="w-3.5 h-3.5" /> Usuario seleccionado
+              </p>
+            )}
+
+            {/* Rol */}
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-on-surface-variant ml-1">Asignar como *</label>
+              <select
+                value={vm.formAsignar.rol}
+                onChange={e => vm.setFormAsignar({
+                  ...vm.formAsignar,
+                  rol: e.target.value as 'SECRETARIA' | 'MEDICO',
+                  especialidadIds: [],
+                })}
+                className="w-full px-4 py-3.5 rounded-2xl bg-surface-container-high border-none outline-none text-sm font-bold cursor-pointer focus:ring-2 focus:ring-primary transition-all"
+              >
+                <option value="SECRETARIA">Secretaria</option>
+                <option value="MEDICO">Médico</option>
+              </select>
+            </div>
+
+            {/* Especialidades (solo MEDICO) */}
+            {vm.formAsignar.rol === 'MEDICO' && (
+              <div className="space-y-2 p-4 bg-surface-container-high rounded-2xl">
+                <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wide">Especialidades *</label>
+                {vm.especialidades.length === 0 ? (
+                  <p className="text-xs italic text-on-surface-variant/60">No hay especialidades creadas.</p>
+                ) : (
+                  <div className="space-y-1 max-h-44 overflow-y-auto pr-1">
+                    {vm.especialidades.map(esp => (
+                      <label key={esp.id} className="flex items-center gap-3 p-2 cursor-pointer rounded-xl hover:bg-surface-container transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={vm.formAsignar.especialidadIds.includes(esp.id)}
+                          onChange={() => vm.toggleEspecialidad(esp.id, 'asignar')}
+                          className="w-4 h-4 accent-primary"
+                        />
+                        <span className="text-sm text-on-surface">{esp.nombre}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+                {vm.formAsignar.especialidadIds.length === 0 && (
+                  <p className="text-xs text-error ml-1">Selecciona al menos una especialidad.</p>
+                )}
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              disabled={!vm.formAsignar.usuarioId || (vm.formAsignar.rol === 'MEDICO' && vm.formAsignar.especialidadIds.length === 0)}
+              isLoading={vm.isSubmitting}
+              icon={<UserCheck className="w-5 h-5" />}
+              className="mt-1"
+            >
+              Asignar al Equipo
+            </Button>
           </form>
         </div>
 
-        {/* LISTADO DEL STAFF DEL CENTRO */}
+        {/* LISTADO STAFF */}
         <div className="lg:col-span-2">
           <div className="bg-surface-container-lowest border border-outline-variant rounded-3xl shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-high/30">
-              <h2 className="font-bold text-on-surface flex items-center gap-2"><Users className="text-primary"/> Mi Equipo de Trabajo</h2>
+            <div className="p-5 border-b border-outline-variant flex items-center gap-3 bg-surface-container-low">
+              <Users className="text-primary w-5 h-5" />
+              <h2 className="font-bold text-on-surface">Mi Equipo de Trabajo</h2>
+              <span className="ml-auto text-xs font-bold text-on-surface-variant bg-surface-container-high px-3 py-1 rounded-full">
+                {vm.staffDelCentro.length} {vm.staffDelCentro.length === 1 ? 'persona' : 'personas'}
+              </span>
             </div>
-            <div className="p-12 text-center text-on-surface-variant flex flex-col items-center gap-3">
-              <Activity className="w-10 h-10 opacity-30" />
-              <p>Aquí aparecerá el personal clínico y administrativo que asignes a tus centros médicos.</p>
-            </div>
+
+            {vm.staffDelCentro.length === 0 ? (
+              <div className="p-14 text-center flex flex-col items-center gap-3 text-on-surface-variant">
+                <Users className="w-12 h-12 opacity-20" />
+                <p className="font-medium">No hay personal asignado a este centro.</p>
+                <p className="text-sm opacity-70">Busca un usuario existente y asígnalo.</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-outline-variant/40">
+                {vm.staffDelCentro.map(u => (
+                  <div key={u.id} className="p-5 flex items-start justify-between gap-4 hover:bg-surface-container-low/60 transition-colors group">
+                    <div className="flex items-start gap-4 min-w-0">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${u.rol === 'MEDICO' ? 'bg-primary-container text-on-primary-container' : 'bg-secondary-container text-on-secondary-container'
+                        }`}>
+                        {getInitials(u.nombreCompleto)}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                          <span className="font-medium text-on-surface text-sm">{u.nombreCompleto}</span>
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${u.rol === 'MEDICO' ? 'bg-primary-container text-on-primary-container' : 'bg-secondary-container text-on-secondary-container'
+                            }`}>
+                            {u.rol === 'MEDICO' ? 'Médico' : 'Secretaria'}
+                          </span>
+                        </div>
+                        <p className="text-xs text-on-surface-variant truncate">{u.correo}</p>
+                        {u.rol === 'MEDICO' && (
+                          <div className="flex flex-wrap gap-1 mt-2 items-center">
+                            {u.especialidades && u.especialidades.length > 0 ? (
+                              u.especialidades.map(esp => (
+                                <span key={esp.id} className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/20 font-bold">
+                                  {esp.nombre}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-xs text-on-surface-variant/50 italic">Sin especialidad</span>
+                            )}
+                            <button
+                              onClick={() => vm.handleOpenEspModal(u)}
+                              className="p-1 hover:bg-primary/10 rounded-full text-primary transition-colors ml-1"
+                              title="Gestionar especialidades"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                      <button onClick={() => vm.handleOpenEdit(u)} className="p-2 hover:bg-secondary-container text-secondary rounded-xl transition-colors" title="Editar">
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      {/* AQUÍ LLAMAMOS A NUESTRA NUEVA FUNCIÓN */}
+                      <button onClick={() => intentarEliminar(u.id, u.nombreCompleto)} className="p-2 hover:bg-error-container text-error rounded-xl transition-colors" title="Eliminar">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* DIÁLOGO DE CONFIRMACIÓN DE ELIMINACIÓN */}
+      <ConfirmDialog
+        isOpen={eliminarConfig.isOpen}
+        title="Eliminar usuario del equipo"
+        message={`¿Estás seguro de que deseas remover a ${eliminarConfig.nombre} de esta sucursal? El usuario perderá acceso al sistema como parte de este centro.`}
+        confirmText="Sí, eliminar"
+        cancelText="Cancelar"
+        isDestructive={true}
+        onConfirm={confirmarEliminacion}
+        onCancel={() => setEliminarConfig({ isOpen: false, id: 0, nombre: '' })}
+      />
+
+      {/* MODAL EDITAR */}
+      <Modal
+        isOpen={vm.showModal && !!vm.editingUser}
+        onClose={() => vm.setShowModal(false)}
+        title="Editar Usuario"
+        subtitle={vm.editingUser?.nombreCompleto}
+        footer={
+          <div className="flex gap-3 pt-2">
+            <Button type="button" variant="outline" onClick={() => vm.setShowModal(false)} className="flex-1">
+              Cancelar
+            </Button>
+            <Button type="submit" form="edit-user-form" isLoading={vm.isSubmitting} className="flex-1">
+              Guardar
+            </Button>
+          </div>
+        }
+      >
+        <form id="edit-user-form" onSubmit={handleSubmitEdit} className="space-y-4">
+          <Input
+            label="Nombre Completo *"
+            type="text"
+            value={vm.formEdit.nombreCompleto}
+            onChange={e => handleEditFieldChange('nombreCompleto', e.target.value)}
+            error={editErrors.nombreCompleto}
+          />
+          <Input
+            label="Correo Electrónico *"
+            type="email"
+            value={vm.formEdit.correo}
+            onChange={e => handleEditFieldChange('correo', e.target.value)}
+            error={editErrors.correo}
+          />
+
+          {vm.editingUser?.rol === 'MEDICO' && (
+            <div className="space-y-2 p-4 bg-surface-container-high rounded-2xl">
+              <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wide">Especialidades</label>
+              <div className="space-y-1 max-h-44 overflow-y-auto pr-1">
+                {vm.especialidades.map(esp => (
+                  <label key={esp.id} className="flex items-center gap-3 p-2 cursor-pointer rounded-xl hover:bg-surface-container transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={vm.formEdit.especialidadIds.includes(esp.id)}
+                      onChange={() => vm.toggleEspecialidad(esp.id, 'edit')}
+                      className="w-4 h-4 accent-primary"
+                    />
+                    <span className="text-sm text-on-surface">{esp.nombre}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+        </form>
+      </Modal>
+
+      <SpecialtiesModal
+        doctor={vm.editingDoctorForEsp}
+        especialidades={vm.especialidades}
+        selectedEspIds={vm.selectedEspIds}
+        isUpdating={vm.isSubmitting}
+        onClose={vm.handleCloseEspModal}
+        onSave={async () => {
+          const result = await vm.handleSaveEspecialidades();
+          if (result.success) {
+            showMsg({ text: 'Especialidades actualizadas correctamente', type: 'success' });
+          } else {
+            showMsg({ text: result.error || 'Error al actualizar especialidades', type: 'error' });
+          }
+        }}
+        onToggleEspSelection={vm.handleToggleEspSelection}
+      />
     </div>
   );
 }
