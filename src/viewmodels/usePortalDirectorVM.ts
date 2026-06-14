@@ -1,5 +1,5 @@
 import { useGetResumenQuery, useGetMetricasPorCentroQuery } from '../services/metricasApi';
-import { useAsignarMedicoMutation } from '../services/usuariosApi';
+import { useAsignarAdminMutation } from '../services/usuariosApi';
 import { useLayoutVM } from './useLayoutVM';
 
 export const usePortalDirectorVM = () => {
@@ -7,15 +7,15 @@ export const usePortalDirectorVM = () => {
   const { data: resumen, isLoading: loadR, isError: errR, refetch: refetchResumen } = useGetResumenQuery();
   const { data: centros, isLoading: loadC, isError: errC } = useGetMetricasPorCentroQuery();
   
-  const [asignarMedico, { isLoading: isAssigning }] = useAsignarMedicoMutation();
+  const [asignarAdmin, { isLoading: isAssigning }] = useAsignarAdminMutation();
 
-  const handleAsignarMedico = async (correo: string) => {
+  const handleAsignarAdmin = async (correo: string) => {
     try {
-      await asignarMedico({ correo }).unwrap();
+      await asignarAdmin({ correo }).unwrap();
       refetchResumen();
       return { success: true };
     } catch (error: any) {
-      return { success: false, error: error.data?.error || 'Error al asignar médico' };
+      return { success: false, error: error.data?.error || 'Error al asignar administrador' };
     }
   };
 
@@ -25,7 +25,7 @@ export const usePortalDirectorVM = () => {
     centros, 
     isLoading: loadR || loadC, 
     isError: errR || errC,
-    handleAsignarMedico,
+    handleAsignarAdmin,
     isAssigning
   };
 };

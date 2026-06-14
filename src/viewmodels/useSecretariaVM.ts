@@ -1,35 +1,45 @@
-import { useState } from 'react';
-import { useGetResumenQuery } from '../services/metricasApi';
+import { useMemo } from 'react';
+import { useGetDashboardSecretariaQuery } from '../services/metricasApi';
+import { useObtenerReservasPorCentroQuery } from '../services/reservasApi';
+import { useMedicosPorCentro } from '../hooks/useMedicosPorCentro';
 
+
+import { useAgendaDiaria } from './secretaria/useAgendaDiaria';
+import { useAgendamientoCita } from './secretaria/useAgendamientoCita';
+import { useBloqueoAgenda } from './secretaria/useBloqueoAgenda';
 
 export const useSecretariaVM = () => {
-  const [rutBusqueda, setRutBusqueda] = useState('');
+
+  const centroId = 1;
+
+  const { data: metricasDashboard, isLoading: loadingMetricas } = useGetDashboardSecretariaQuery({ centroId });
   
-  const { data: resumen, isLoading: loadingMetricas } = useGetResumenQuery();
+  const { data: reservasPage, isLoading: loadingReservas } = useObtenerReservasPorCentroQuery({ centroId, page: 0, size: 50 });
+ 
+  const reservas = reservasPage?.content ?? [];
+  
+ 
+  const medicosDelCentro = useMedicosPorCentro(centroId);
 
-  // Por ahora usaremos las métricas del resumen
-  const stats = [
-    { label: 'Citas Totales', value: resumen?.totalReservas || 0, icon: 'calendar_today', sub: 'hoy' },
-    { label: 'Pendientes Check-in', value: resumen?.reservasVigentes || 0, icon: 'hourglass_empty', sub: 'requiere acción' },
-    { label: 'En Lista de Espera', value: 15, icon: 'list_alt', sub: 'pacientes' }, // Valor ejemplo basado en mockup
-    { label: 'Cupos Disponibles', value: 12, icon: 'event_available', sub: 'en 5 médicos' }
-  ];
 
-  const handleCheckIn = () => {
-    if (!rutBusqueda) return alert("Ingrese un RUT para procesar");
-    console.log(`Procesando ingreso para: ${rutBusqueda}`);
+  const stats = useMemo(() => [
+    { label: 'Citas Hoy', value: metricasDashboard?.totalReservasHoy ?? 0, sub: `${metricasDashboard?.citasConfirmadas ?? 0} confirmadas` },
+    { label: 'Pendientes Check-in', value: metricasDashboard?.pendientesCheckin ?? 0, sub: 'Por llegar' },
+    { label: 'Médicos', value: metricasDashboard?.totalMedicosCentro ?? 0, sub: 'En el centro' },
+    { label: 'Canceladas Hoy', value: metricasDashboard?.citasCanceladasHoy ?? 0, sub: 'Reasignadas' },
+  ], [metricasDashboard]);
 
-    // Aquí iría la llamada a un PATCH en reservasApi para cambiar el estado a "ATENDIDO"
-
-    alert(`Check-in exitoso para el paciente ${rutBusqueda}`);
-    setRutBusqueda('');
-  };
+  const { stats: _statsAgenda, ...restAgendaDiaria } = useAgendaDiaria(reservas);
+  const agendamientoCita = useAgendamientoCita();
+  const bloqueoAgenda = useBloqueoAgenda();
 
   return {
+    isLoading: loadingMetricas || loadingReservas,
+    centroId,
+    medicosDelCentro,
     stats,
-    loadingMetricas,
-    rutBusqueda,
-    setRutBusqueda,
-    handleCheckIn
+    ...restAgendaDiaria,
+    ...agendamientoCita,
+    ...bloqueoAgenda
   };
 };

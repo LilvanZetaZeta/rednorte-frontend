@@ -6,6 +6,8 @@ import {
   useCrearPerfilMutation,
   useActualizarPerfilMutation 
 } from '../services/perfilPacienteApi';
+// 1. Importar los hooks de reasignación
+import { useObtenerOfertasQuery, useResponderOfertaMutation } from '../services/reasignacionesApi';
 
 export const usePortalPacienteVM = () => {
   const [userName, setUserName] = useState('Paciente');
@@ -30,13 +32,23 @@ export const usePortalPacienteVM = () => {
   const { data: perfil, isLoading: loadingPerfil } = 
     useObtenerMiPerfilQuery(userId, { skip: !userId });
 
+  // 2. Consulta de ofertas pendientes atada al userId
+  const { data: ofertas = [], isLoading: loadingOfertas } = 
+    useObtenerOfertasQuery(userId, { skip: !userId });
+
   const [cancelar] = useCancelarReservaMutation();
   const [crearPerfil] = useCrearPerfilMutation();
   const [actualizarPerfil] = useActualizarPerfilMutation();
+  
+  // 3. Mutación para procesar la respuesta
+  const [responderMutation, { isLoading: isProcesandoOferta }] = useResponderOfertaMutation();
 
   const handleCancelar = async (id: number) => {
-    if (window.confirm('¿Cancelar esta reserva?')) {
-      try { await cancelar(id).unwrap(); } catch { alert('Error al cancelar.'); }
+    try { 
+      await cancelar(id).unwrap(); 
+      return { success: true };
+    } catch { 
+      return { success: false, error: 'Error al cancelar la reserva.' }; 
     }
   };
 
@@ -45,7 +57,7 @@ export const usePortalPacienteVM = () => {
       if (perfil) {
         await actualizarPerfil({ id: perfil.id, data }).unwrap();
       } else {
-        await crearPerfil(data).unwrap();
+        await crearPerfil({ ...data, idAuth: userId }).unwrap();
       }
       return { success: true };
     } catch {
@@ -53,15 +65,31 @@ export const usePortalPacienteVM = () => {
     }
   };
 
+  // 4. Lógica de negocio para determinar la oferta a mostrar
+  const ofertaPendiente = ofertas.length > 0 ? ofertas[0] : null;
+
+  // 5. Manejador para la vista, usando el mismo patrón de retorno que tus otras funciones
+  const handleResponderOferta = async (estado: 'ACEPTADA' | 'RECHAZADA') => {
+    if (!ofertaPendiente) return { success: false, error: 'No hay oferta pendiente que responder.' };
+    
+    try {
+      await responderMutation({ ofertaId: ofertaPendiente.id, estado }).unwrap();
+      return { success: true };
+    } catch (error) {
+      console.error("Fallo al responder a la reasignación", error);
+      return { success: false, error: 'Hubo un problema de red al procesar tu respuesta.' };
+    }
+  };
+
   return {
-    userName,
-    userRut,
-    userEmail,
-    userId,
-    reservas,
-    perfil,          // prevision + telefonoContacto desde ms-portal
-    isLoading: loadingReservas || loadingPerfil,
-    handleCancelar,
-    handleGuardarPerfil,
+    userName, userRut, userEmail, userId, reservas, perfil,
+    // CRÍTICO: Sumamos loadingOfertas para no renderizar la vista hasta que tengamos la respuesta del Gateway
+    isLoading: loadingReservas || loadingPerfil || loadingOfertas,
+    handleCancelar, handleGuardarPerfil,
+    
+    // 6. Exportamos las herramientas para la vista
+    ofertaPendiente,
+    handleResponderOferta,
+    isProcesandoOferta
   };
 };

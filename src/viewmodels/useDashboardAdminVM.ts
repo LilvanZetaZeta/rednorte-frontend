@@ -1,13 +1,16 @@
-import { useGetUsuariosStaffQuery, useUpdateUsuarioRolMutation, useUpdateUsuarioCentroMutation } from '../services/usuariosApi';
+import { useGetUsuariosStaffQuery, useUpdateUsuarioRolMutation, useUpdateUsuarioCentroMutation, useUpdateUsuarioEspecialidadesMutation } from '../services/usuariosApi';
 import { useGetCentrosQuery } from '../services/centrosMedicosApi';
+import { useGetEspecialidadesQuery } from '../services/catalogosApi';
 import { supabase } from '../config/supabaseClient';
 import { useState, useEffect } from 'react';
 
 export const useDashboardAdminVM = () => {
   const { data: staff, isLoading, isError } = useGetUsuariosStaffQuery();
   const { data: centros } = useGetCentrosQuery();
+  const { data: especialidades } = useGetEspecialidadesQuery();
   const [updateRol] = useUpdateUsuarioRolMutation();
   const [updateCentro] = useUpdateUsuarioCentroMutation();
+  const [updateEspecialidades] = useUpdateUsuarioEspecialidadesMutation();
   const [isDirector, setIsDirector] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -41,5 +44,28 @@ export const useDashboardAdminVM = () => {
     }
   };
 
-  return { staff, centros, isLoading, isError, isDirector, handleUpdateRol, handleUpdateCentro, isUpdating };
+  const handleUpdateEspecialidades = async (id: number, especialidadIds: number[]) => {
+    setIsUpdating(true);
+    try {
+      await updateEspecialidades({ id, especialidadIds }).unwrap();
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: 'Error al actualizar especialidades' };
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  return { 
+    staff, 
+    centros, 
+    especialidades,
+    isLoading, 
+    isError, 
+    isDirector, 
+    handleUpdateRol, 
+    handleUpdateCentro, 
+    handleUpdateEspecialidades,
+    isUpdating 
+  };
 };

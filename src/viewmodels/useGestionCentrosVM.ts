@@ -1,20 +1,23 @@
 import { useState } from 'react';
-import { 
-  useGetCentrosQuery, 
-  useCreateCentroMutation, 
-  useUpdateCentroMutation, 
+import {
+  useGetCentrosQuery,
+  useCreateCentroMutation,
+  useUpdateCentroMutation,
   useDeleteCentroMutation,
 } from '../services/centrosMedicosApi';
-import type { CentroMedico } from '../services/centrosMedicosApi';
+import { useGetAdminsDisponiblesQuery, useUpdateUsuarioCentroMutation } from '../services/usuariosApi';
+import type { ICentroMedico } from '../models/types';
 
 export const useGestionCentrosVM = () => {
   const { data: centros, isLoading, isError, refetch } = useGetCentrosQuery();
+  const { data: adminsDisponibles, refetch: refetchAdmins } = useGetAdminsDisponiblesQuery();
   const [createCentro] = useCreateCentroMutation();
   const [updateCentro] = useUpdateCentroMutation();
   const [deleteCentro] = useDeleteCentroMutation();
+  const [updateUsuarioCentro] = useUpdateUsuarioCentroMutation();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingCentro, setEditingCentro] = useState<CentroMedico | null>(null);
+  const [editingCentro, setEditingCentro] = useState<ICentroMedico | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleOpenCreate = () => {
@@ -22,20 +25,36 @@ export const useGestionCentrosVM = () => {
     setIsModalOpen(true);
   };
 
-  const handleOpenEdit = (centro: CentroMedico) => {
+  const handleOpenEdit = (centro: ICentroMedico) => {
     setEditingCentro(centro);
     setIsModalOpen(true);
   };
 
-  const handleSave = async (data: Partial<CentroMedico>) => {
+  const handleSave = async (
+    data: Partial<ICentroMedico>, 
+    newAdminId: number | null | undefined, 
+    previousAdminId: number | null
+  ) => {
     setIsSubmitting(true);
     try {
+      let savedCentro: ICentroMedico;
       if (editingCentro?.id) {
-        await updateCentro({ id: editingCentro.id, data }).unwrap();
+        savedCentro = await updateCentro({ id: editingCentro.id, data }).unwrap();
       } else {
-        await createCentro(data).unwrap();
+        savedCentro = await createCentro(data).unwrap();
       }
+
+      if (newAdminId !== undefined) {
+        if (previousAdminId && previousAdminId !== newAdminId) {
+          await updateUsuarioCentro({ id: previousAdminId, centroId: null }).unwrap();
+        }
+        if (newAdminId && savedCentro.id) {
+          await updateUsuarioCentro({ id: newAdminId, centroId: savedCentro.id }).unwrap();
+        }
+      }
+
       setIsModalOpen(false);
+      refetchAdmins();
       return { success: true };
     } catch (error) {
       return { success: false, error: 'Error al guardar el centro médico' };
@@ -45,18 +64,17 @@ export const useGestionCentrosVM = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('¿Estás seguro de eliminar este centro médico?')) {
-      try {
-        await deleteCentro(id).unwrap();
-        return { success: true };
-      } catch (error) {
-        return { success: false, error: 'Error al eliminar el centro médico' };
-      }
+    try {
+      await deleteCentro(id).unwrap();
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: 'Error al eliminar el centro médico' };
     }
   };
 
   return {
     centros,
+    adminsDisponibles,
     isLoading,
     isError,
     isModalOpen,

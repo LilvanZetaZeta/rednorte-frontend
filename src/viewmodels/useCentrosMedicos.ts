@@ -1,4 +1,4 @@
-import { useObtenerCentrosMedicosQuery } from '../services/centroMedicoService';
+import { useObtenerCentrosMedicosQuery } from '../services/centrosMedicosApi';
 
 export const useCentrosMedicos = () => {
   const { data: centros = [], isLoading, isError } = useObtenerCentrosMedicosQuery();
