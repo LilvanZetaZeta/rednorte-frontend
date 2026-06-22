@@ -1,7 +1,7 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { usePortalPacienteVM } from '../viewmodels/usePortalPacienteVM';
 import { Stethoscope, CalendarDays, User, Phone, Shield, Pencil } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
@@ -12,7 +12,7 @@ import StatusBadge from '../components/ui/StatusBadge';
 import HistorialDetalleModal from '../components/dashboard/HistorialDetalleModal';
 
 export default function PortalPaciente() {
-  
+  const location = useLocation();
   const { 
     userName, userRut, userEmail, reservas, perfil, isLoading, handleCancelar, handleGuardarPerfil,
     ofertaPendiente, handleResponderOferta, isProcesandoOferta, isCanceling, isGuardandoPerfil 
@@ -30,6 +30,21 @@ export default function PortalPaciente() {
   const proximasCitas = reservas.filter(r => r.estado === 'VIGENTE' || r.estado === 'CONFIRMADA');
   const historialCitas = reservas.filter(r => r.estado !== 'VIGENTE' && r.estado !== 'CONFIRMADA');
 
+  // ESCUCHA SI VENIMOS DESDE RESERVAS CON UN TOAST EN EL STATE DE LA NAVEGACIÓN
+  useEffect(() => {
+    if (location.state?.infoMessage) {
+      setMessage({
+        text: location.state.infoMessage,
+        type: location.state.infoType || 'success'
+      });
+
+      // Limpia el historial del estado de navegación para evitar que el Toast repita si se refresca la pantalla
+      window.history.replaceState({}, document.title);
+
+      // Desvanece el mensaje automáticamente tras 5 segundos
+      setTimeout(() => setMessage(null), 5000);
+    }
+  }, [location]);
 
   const showMsg = (text: string, type: 'success' | 'error') => {
     setMessage({ text, type });
@@ -59,27 +74,25 @@ export default function PortalPaciente() {
   ];
 
   const guardar = async () => {
-  
-  const digitosLimpios = telefono.trim();
+    const digitosLimpios = telefono.trim();
 
-  // Si el usuario ingresó los 8 dígitos, armamos el formato internacional completo (+569XXXXXXXX)
-  // Si lo dejó vacío, enviamos un string vacío o mantén la lógica que espere tu backend
-  const telefonoCompleto = digitosLimpios.length === 8 ? `+569${digitosLimpios}` : '';
+    // Si el usuario ingresó los 8 dígitos, armamos el formato internacional completo (+569XXXXXXXX)
+    const telefonoCompleto = digitosLimpios.length === 8 ? `+569${digitosLimpios}` : '';
 
-  // Enviamos los datos procesados al ViewModel
-  const result = await handleGuardarPerfil({ 
-    prevision, 
-    telefonoContacto: telefonoCompleto 
-  });
-  
-  if(result.success) {
-    showMsg('Perfil actualizado', 'success');
-  } else {
-    showMsg('Error al guardar el perfil', 'error');
-  }
-  
-  setEditandoPerfil(false);
-};
+    // Enviamos los datos procesados al ViewModel
+    const result = await handleGuardarPerfil({ 
+      prevision, 
+      telefonoContacto: telefonoCompleto 
+    });
+    
+    if(result.success) {
+      showMsg('Perfil actualizado', 'success');
+    } else {
+      showMsg('Error al guardar el perfil', 'error');
+    }
+    
+    setEditandoPerfil(false);
+  };
 
   const confirmarCancelacion = async () => {
     const result = await handleCancelar(cancelarConfig.id);
@@ -88,7 +101,6 @@ export default function PortalPaciente() {
     setCancelarConfig({ isOpen: false, id: 0 });
   };
 
-  //Función para manejar la respuesta a la oferta usando Toast
   const responderAlerta = async (estado: 'ACEPTADA' | 'RECHAZADA') => {
     const result = await handleResponderOferta(estado);
     if (result.success) {
@@ -201,17 +213,14 @@ export default function PortalPaciente() {
               const soloNumeros = e.target.value.replace(/\D/g, '');
               setTelefono(soloNumeros);
             }} 
-            // CORRECCIÓN 1: Cambiamos el placeholder a 8 dígitos seguidos, calzará perfecto con el espacio
             placeholder="12345678"
-            // CORRECCIÓN 2: Le inyectamos un padding izquierdo extra directo al input usando className para empujar el texto y el placeholder hacia la derecha
             className="[&_input]:pl-16" 
             iconLeft={
-              // CORRECCIÓN 3: Aseguramos que el prefijo no se mueva usando clases de alineación exacta
               <span className="text-sm font-bold text-on-surface-variant/80 select-none whitespace-nowrap block mt-[1px]">
                 +56 9
               </span>
             }
-            />
+          />
         </div>
       </Modal>
 
