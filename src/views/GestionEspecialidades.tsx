@@ -105,6 +105,7 @@ export default function GestionEspecialidades() {
         message={`¿Estás seguro de eliminar la especialidad "${eliminarConfig.nombre}"? Esta acción removerá la etiqueta de los médicos asociados.`}
         isDestructive={true}
         confirmText="Sí, eliminar"
+        isLoading={isSubmitting}
         onConfirm={confirmarEliminacion}
         onCancel={() => setEliminarConfig({ isOpen: false, id: 0, nombre: '' })}
       />

@@ -36,9 +36,9 @@ export const usePortalPacienteVM = () => {
   const { data: ofertas = [], isLoading: loadingOfertas } = 
     useObtenerOfertasQuery(userId, { skip: !userId });
 
-  const [cancelar] = useCancelarReservaMutation();
-  const [crearPerfil] = useCrearPerfilMutation();
-  const [actualizarPerfil] = useActualizarPerfilMutation();
+  const [cancelar, { isLoading: isCanceling }] = useCancelarReservaMutation();
+  const [crearPerfil, { isLoading: isCreatingPerfil }] = useCrearPerfilMutation();
+  const [actualizarPerfil, { isLoading: isUpdatingPerfil }] = useActualizarPerfilMutation();
   
   // 3. Mutación para procesar la respuesta
   const [responderMutation, { isLoading: isProcesandoOferta }] = useResponderOfertaMutation();
@@ -86,6 +86,8 @@ export const usePortalPacienteVM = () => {
     // CRÍTICO: Sumamos loadingOfertas para no renderizar la vista hasta que tengamos la respuesta del Gateway
     isLoading: loadingReservas || loadingPerfil || loadingOfertas,
     handleCancelar, handleGuardarPerfil,
+    isCanceling,
+    isGuardandoPerfil: isCreatingPerfil || isUpdatingPerfil,
     
     // 6. Exportamos las herramientas para la vista
     ofertaPendiente,
