@@ -15,7 +15,7 @@ export default function PortalPaciente() {
   
   const { 
     userName, userRut, userEmail, reservas, perfil, isLoading, handleCancelar, handleGuardarPerfil,
-    ofertaPendiente, handleResponderOferta, isProcesandoOferta 
+    ofertaPendiente, handleResponderOferta, isProcesandoOferta, isCanceling, isGuardandoPerfil 
   } = usePortalPacienteVM();
   
   const [editandoPerfil, setEditandoPerfil] = useState(false);
@@ -125,9 +125,9 @@ export default function PortalPaciente() {
               <div className="flex flex-wrap gap-3">
                 <Button 
                   onClick={() => responderAlerta('ACEPTADA')}
-                  disabled={isProcesandoOferta}
+                  isLoading={isProcesandoOferta}
                 >
-                  {isProcesandoOferta ? 'Procesando...' : 'Aceptar Nueva Cita'}
+                  Aceptar Nueva Cita
                 </Button>
                 <Button 
                   variant="outline"
@@ -162,12 +162,7 @@ export default function PortalPaciente() {
         onClose={() => setEditandoPerfil(false)}
         title="Actualizar mi Perfil"
         maxWidth="sm"
-        footer={
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={() => setEditandoPerfil(false)} className="flex-1">Cancelar</Button>
-            <Button onClick={guardar} className="flex-1">Guardar</Button>
-          </div>
-        }
+        footer={<div className="flex gap-3"><Button variant="outline" onClick={() => setEditandoPerfil(false)} className="flex-1">Cancelar</Button><Button onClick={guardar} isLoading={isGuardandoPerfil} className="flex-1">Guardar</Button></div>}
       >
         <div className="space-y-4">
           {/* CAMPO DE SELECCIÓN DE PREVISIÓN (CON TUS ESTILOS NATIVOS) */}
@@ -226,6 +221,7 @@ export default function PortalPaciente() {
         message="¿Estás seguro de que deseas cancelar esta reserva? Esta acción no se puede deshacer."
         isDestructive={true}
         confirmText="Sí, cancelar cita"
+        isLoading={isCanceling}
         onConfirm={confirmarCancelacion}
         onCancel={() => setCancelarConfig({ isOpen: false, id: 0 })}
       />

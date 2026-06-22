@@ -116,7 +116,7 @@ export default function PortalSecretaria() {
           <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
             <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2"><CheckCircle className="text-[#00507d]" size={20} /> Ingreso Express</h2>
             <Input iconLeft={<Search size={18} />} value={vm.rutBusqueda} onChange={(e) => vm.setRutBusqueda(e.target.value)} placeholder="Escanear o ingresar RUT..." className="mb-4" />
-            <Button onClick={onCheckIn} className="w-full">Confirmar Llegada (Check-In)</Button>
+            <Button onClick={onCheckIn} isLoading={vm.isUpdating} className="w-full">Confirmar Llegada (Check-In)</Button>
           </div>
 
           <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex-1">
@@ -186,6 +186,7 @@ export default function PortalSecretaria() {
         message="¿Estás seguro de cancelar esta reserva? El sistema validará la regla de penalización de 24 horas automáticamente."
         isDestructive={true}
         confirmText="Cancelar Reserva"
+        isLoading={vm.isCanceling}
         onConfirm={confirmarCancelacion}
         onCancel={() => setCancelarConfig({ isOpen: false, id: 0 })}
       />
@@ -195,6 +196,7 @@ export default function PortalSecretaria() {
         title="Marcar Inasistencia"
         message="¿Confirmas que el paciente no se presentó a su cita médica programada?"
         confirmText="Marcar como Inasistente"
+        isLoading={vm.isUpdating}
         onConfirm={confirmarInasistencia}
         onCancel={() => setInasistenciaConfig({ isOpen: false, id: 0 })}
       />
@@ -211,7 +213,7 @@ export default function PortalSecretaria() {
         onClose={() => vm.setShowModalBloqueo(false)}
         title="Bloquear Agenda Médica"
         maxWidth="sm"
-        footer={<div className="flex gap-3"><Button variant="outline" type="button" onClick={() => vm.setShowModalBloqueo(false)} className="flex-1">Cancelar</Button><Button variant="danger" type="submit" form="form-bloqueo-agenda" className="flex-1">Ejecutar Bloqueo</Button></div>}
+        footer={<div className="flex gap-3"><Button variant="outline" type="button" onClick={() => vm.setShowModalBloqueo(false)} className="flex-1">Cancelar</Button><Button variant="danger" type="submit" form="form-bloqueo-agenda" isLoading={vm.isBloqueando} className="flex-1">Ejecutar Bloqueo</Button></div>}
       >
         <form id="form-bloqueo-agenda" onSubmit={onBloqueo} className="space-y-4">
           <div className="p-3 bg-red-50 border border-red-100 rounded-xl text-xs text-red-800 font-medium">Esta acción cancelará todas las citas del médico en la fecha indicada y encenderá de forma autónoma el motor reactivo de reasignación.</div>
