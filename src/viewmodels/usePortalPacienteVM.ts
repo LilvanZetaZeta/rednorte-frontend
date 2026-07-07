@@ -47,8 +47,8 @@ export const usePortalPacienteVM = () => {
     try { 
       await cancelar(id).unwrap(); 
       return { success: true };
-    } catch { 
-      return { success: false, error: 'Error al cancelar la reserva.' }; 
+    } catch (err: any) { 
+      return { success: false, error: err?.data?.error || 'Error al cancelar la reserva.' }; 
     }
   };
 
@@ -60,8 +60,8 @@ export const usePortalPacienteVM = () => {
         await crearPerfil({ ...data, idAuth: userId }).unwrap();
       }
       return { success: true };
-    } catch {
-      return { success: false };
+    } catch (err: any) {
+      return { success: false, error: err?.data?.error || 'Error al guardar el perfil' };
     }
   };
 
@@ -75,9 +75,9 @@ export const usePortalPacienteVM = () => {
     try {
       await responderMutation({ ofertaId: ofertaPendiente.id, estado }).unwrap();
       return { success: true };
-    } catch (error) {
+    } catch (error: any) {
       console.error("Fallo al responder a la reasignación", error);
-      return { success: false, error: 'Hubo un problema de red al procesar tu respuesta.' };
+      return { success: false, error: error?.data?.error || 'Hubo un problema de red al procesar tu respuesta.' };
     }
   };
 
