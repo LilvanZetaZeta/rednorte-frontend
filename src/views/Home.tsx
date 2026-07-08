@@ -15,6 +15,7 @@ import {
   Calendar
 } from 'lucide-react';
 import heroImage from '../assets/hero.webp'; 
+import Button from '../components/ui/Button';
 
 export default function Home() {
   const vm = useAuthVM();
@@ -119,9 +120,9 @@ export default function Home() {
                   
                   {vm.authError && <div className="p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm font-bold flex items-center gap-2"><ShieldPlus className="shrink-0"/> {vm.authError}</div>}
                   
-                  <button type="submit" className="w-full bg-[#00507d] text-white py-4 rounded-xl font-bold mt-4 hover:bg-sky-800 transition-all shadow-lg active:scale-[0.98]">
+                  <Button type="submit" isLoading={vm.isLoading} className="w-full mt-4">
                     {vm.isLogin ? 'Ingresar a mi Portal' : 'Registrarme ahora'}
-                  </button>
+                  </Button>
                 </form>
                 <button onClick={() => vm.setIsLogin(!vm.isLogin)} className="mt-auto pt-8 text-slate-500 text-sm font-medium w-full text-center hover:text-[#00507d] transition-colors">
                   {vm.isLogin ? '¿No tienes cuenta? ' : '¿Ya eres paciente? '} <span className="font-bold underline">{vm.isLogin ? 'Crea tu cuenta' : 'Inicia sesión'}</span>

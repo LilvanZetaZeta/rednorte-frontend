@@ -1,7 +1,7 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { usePortalPacienteVM } from '../viewmodels/usePortalPacienteVM';
 import { Stethoscope, CalendarDays, User, Phone, Shield, Pencil } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
@@ -12,10 +12,10 @@ import StatusBadge from '../components/ui/StatusBadge';
 import HistorialDetalleModal from '../components/dashboard/HistorialDetalleModal';
 
 export default function PortalPaciente() {
-  
+  const location = useLocation();
   const { 
     userName, userRut, userEmail, reservas, perfil, isLoading, handleCancelar, handleGuardarPerfil,
-    ofertaPendiente, handleResponderOferta, isProcesandoOferta 
+    ofertaPendiente, handleResponderOferta, isProcesandoOferta, isCanceling, isGuardandoPerfil 
   } = usePortalPacienteVM();
   
   const [editandoPerfil, setEditandoPerfil] = useState(false);
@@ -30,6 +30,21 @@ export default function PortalPaciente() {
   const proximasCitas = reservas.filter(r => r.estado === 'VIGENTE' || r.estado === 'CONFIRMADA');
   const historialCitas = reservas.filter(r => r.estado !== 'VIGENTE' && r.estado !== 'CONFIRMADA');
 
+  // ESCUCHA SI VENIMOS DESDE RESERVAS CON UN TOAST EN EL STATE DE LA NAVEGACIÓN
+  useEffect(() => {
+    if (location.state?.infoMessage) {
+      setMessage({
+        text: location.state.infoMessage,
+        type: location.state.infoType || 'success'
+      });
+
+      // Limpia el historial del estado de navegación para evitar que el Toast repita si se refresca la pantalla
+      window.history.replaceState({}, document.title);
+
+      // Desvanece el mensaje automáticamente tras 5 segundos
+      setTimeout(() => setMessage(null), 5000);
+    }
+  }, [location]);
 
   const showMsg = (text: string, type: 'success' | 'error') => {
     setMessage({ text, type });
@@ -38,14 +53,44 @@ export default function PortalPaciente() {
 
   const abrirEdicion = () => {
     setPrevision(perfil?.prevision || '');
-    setTelefono(perfil?.telefonoContacto || '');
+    const telefonoGuardado = perfil?.telefonoContacto || '';
+    const telefonoLimpio = telefonoGuardado.replace(/^(\+569|569)/, ''); 
+    setTelefono(telefonoLimpio);
     setEditandoPerfil(true);
   };
 
+  const OPCIONES_PREVISION = [
+    "FONASA A",
+    "FONASA B",
+    "FONASA C",
+    "FONASA D",
+    "Isapre Banmédica",
+    "Isapre Colmena",
+    "Isapre Consalud",
+    "Isapre Cruz Blanca",
+    "Isapre Vida Tres",
+    "Isapre Nueva Masvida",
+    "Isapre Esencial",
+  ];
+
   const guardar = async () => {
-    const result = await handleGuardarPerfil({ prevision, telefonoContacto: telefono });
-    if(result.success) showMsg('Perfil actualizado', 'success');
-    else showMsg('Error al guardar el perfil', 'error');
+    const digitosLimpios = telefono.trim();
+
+    // Si el usuario ingresó los 8 dígitos, armamos el formato internacional completo (+569XXXXXXXX)
+    const telefonoCompleto = digitosLimpios.length === 8 ? `+569${digitosLimpios}` : '';
+
+    // Enviamos los datos procesados al ViewModel
+    const result = await handleGuardarPerfil({ 
+      prevision, 
+      telefonoContacto: telefonoCompleto 
+    });
+    
+    if(result.success) {
+      showMsg('Perfil actualizado', 'success');
+    } else {
+      showMsg('Error al guardar el perfil', 'error');
+    }
+    
     setEditandoPerfil(false);
   };
 
@@ -56,7 +101,6 @@ export default function PortalPaciente() {
     setCancelarConfig({ isOpen: false, id: 0 });
   };
 
-  //Función para manejar la respuesta a la oferta usando Toast
   const responderAlerta = async (estado: 'ACEPTADA' | 'RECHAZADA') => {
     const result = await handleResponderOferta(estado);
     if (result.success) {
@@ -93,9 +137,9 @@ export default function PortalPaciente() {
               <div className="flex flex-wrap gap-3">
                 <Button 
                   onClick={() => responderAlerta('ACEPTADA')}
-                  disabled={isProcesandoOferta}
+                  isLoading={isProcesandoOferta}
                 >
-                  {isProcesandoOferta ? 'Procesando...' : 'Aceptar Nueva Cita'}
+                  Aceptar Nueva Cita
                 </Button>
                 <Button 
                   variant="outline"
@@ -130,11 +174,53 @@ export default function PortalPaciente() {
         onClose={() => setEditandoPerfil(false)}
         title="Actualizar mi Perfil"
         maxWidth="sm"
-        footer={<div className="flex gap-3"><Button variant="outline" onClick={() => setEditandoPerfil(false)} className="flex-1">Cancelar</Button><Button onClick={guardar} className="flex-1">Guardar</Button></div>}
+        footer={<div className="flex gap-3"><Button variant="outline" onClick={() => setEditandoPerfil(false)} className="flex-1">Cancelar</Button><Button onClick={guardar} isLoading={isGuardandoPerfil} className="flex-1">Guardar</Button></div>}
       >
         <div className="space-y-4">
-          <Input label="Previsión" value={prevision} onChange={e => setPrevision(e.target.value)} placeholder="Ej: Fonasa A, Isapre Cruz Blanca..." />
-          <Input label="Teléfono de contacto" value={telefono} onChange={e => setTelefono(e.target.value)} placeholder="+56 9 1234 5678" />
+          {/* CAMPO DE SELECCIÓN DE PREVISIÓN (CON TUS ESTILOS NATIVOS) */}
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-on-surface ml-1">
+              Previsión
+            </label>
+            <div className="relative">
+              <select
+                value={prevision}
+                onChange={e => setPrevision(e.target.value)}
+                className="w-full py-3.5 px-5 rounded-2xl bg-surface-container-high border border-transparent text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all cursor-pointer appearance-none"
+              >
+                <option value="" disabled>Selecciona tu previsión</option>
+                {OPCIONES_PREVISION.map((opcion) => (
+                  <option key={opcion} value={opcion} className="bg-surface-container-high text-on-surface">
+                    {opcion}
+                  </option>
+                ))}
+              </select>
+              {/* Flecha decorativa del dropdown */}
+              <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-on-surface-variant/70">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* EL TELÉFONO SE MANTIENE USANDO TU COMPONENTE INPUT ORIGINAL */}
+          <Input 
+            label="Teléfono de contacto" 
+            value={telefono} 
+            maxLength={8} 
+            onChange={e => {
+              const soloNumeros = e.target.value.replace(/\D/g, '');
+              setTelefono(soloNumeros);
+            }} 
+            placeholder="12345678"
+            className="[&_input]:pl-16" 
+            iconLeft={
+              <span className="text-sm font-bold text-on-surface-variant/80 select-none whitespace-nowrap block mt-[1px]">
+                +56 9
+              </span>
+            }
+          />
         </div>
       </Modal>
 
@@ -144,6 +230,7 @@ export default function PortalPaciente() {
         message="¿Estás seguro de que deseas cancelar esta reserva? Esta acción no se puede deshacer."
         isDestructive={true}
         confirmText="Sí, cancelar cita"
+        isLoading={isCanceling}
         onConfirm={confirmarCancelacion}
         onCancel={() => setCancelarConfig({ isOpen: false, id: 0 })}
       />

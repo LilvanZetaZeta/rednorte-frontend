@@ -30,7 +30,7 @@ export const useGestionStaff = (miCentroId: number | null) => {
 
   const [updateCentro] = useUpdateUsuarioCentroMutation();
   const [updateEspecialidades] = useUpdateUsuarioEspecialidadesMutation();
-  const [eliminarUsuario] = useEliminarUsuarioMutation();
+  const [eliminarUsuario, { isLoading: isEliminando }] = useEliminarUsuarioMutation();
   const [patchUsuario] = usePatchUsuarioMutation();
   const [updateRol] = useUpdateUsuarioRolMutation();
 
@@ -193,6 +193,7 @@ export const useGestionStaff = (miCentroId: number | null) => {
     handleOpenEspModal,
     handleCloseEspModal,
     handleToggleEspSelection,
-    handleSaveEspecialidades
+    handleSaveEspecialidades,
+    isEliminando
   };
 };

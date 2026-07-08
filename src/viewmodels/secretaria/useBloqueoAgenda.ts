@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useBloquearAgendaMedicoMutation } from '../../services/reservasApi';
 
 export const useBloqueoAgenda = () => {
-  const [bloquearAgenda] = useBloquearAgendaMedicoMutation();
+  const [bloquearAgenda, { isLoading: isBloqueando }] = useBloquearAgendaMedicoMutation();
   const [showModalBloqueo, setShowModalBloqueo] = useState(false);
   const [bloqueoData, setBloqueoData] = useState({ medicoId: '', fecha: '' });
 
@@ -27,6 +27,7 @@ export const useBloqueoAgenda = () => {
     setShowModalBloqueo,
     bloqueoData,
     setBloqueoData,
-    handleBloqueoSubmit
+    handleBloqueoSubmit,
+    isBloqueando
   };
 };

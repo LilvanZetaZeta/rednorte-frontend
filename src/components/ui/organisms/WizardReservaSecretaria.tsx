@@ -1,9 +1,8 @@
-import { useMemo, useState, type FormEvent } from 'react';
-import { useCrearReservaMutation } from '../../../services/reservasApi';
+import { useMemo, useState, useEffect, type FormEvent } from 'react';
+import { useCrearReservaMutation, useLazyObtenerSlotsDisponiblesQuery } from '../../../services/reservasApi';
 import { useGetUsuariosStaffQuery } from '../../../services/usuariosApi';
 import type { IUsuario } from '../../../models/types';
 import Button from '../Button';
-import Input from '../Input';
 import Modal from '../Modal';
 import BuscadorPacienteRut from '../molecules/BuscadorPacienteRut';
 import { normalizeRutForBackend } from '../../../utils/formatters';
@@ -29,28 +28,23 @@ export default function WizardReservaSecretaria({ isOpen, centroId, onClose, onS
   const [pacienteRut, setPacienteRut] = useState('');
   const [pacienteNombre, setPacienteNombre] = useState('');
   const [pacienteCorreo, setPacienteCorreo] = useState('');
-  
-  // Estados temporales para las nuevas opciones de exámenes/procedimientos
+
   const [servicioAdicionalId, setServicioAdicionalId] = useState('');
   const [salaId, setSalaId] = useState('');
-  
-  const [fechaHora, setFechaHora] = useState('');
+
+  // CAMBIO 1: fechaHora → fechaSelec + slotSelec
+  const [fechaSelec, setFechaSelec] = useState('');
+  const [slotSelec, setSlotSelec] = useState('');
   const [error, setError] = useState('');
   const [pacienteExiste, setPacienteExiste] = useState<boolean | null>(null);
   const [rutValidado, setRutValidado] = useState(false);
 
   const { data: usuarios = [] } = useGetUsuariosStaffQuery();
   const [crearReserva, { isLoading: creandoReserva }] = useCrearReservaMutation();
+  // CAMBIO 2: hook de slots
+  const [fetchSlots, { data: slots, isLoading: loadSlots }] = useLazyObtenerSlotsDisponiblesQuery();
 
-  const minDateTime = useMemo(() => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-  }, []);
+  const hoy = new Date().toISOString().split('T')[0];
 
   const medicosDelCentro = useMemo<IUsuario[]>(() => {
     return usuarios.filter((u) => u.rol === 'MEDICO' && u.centroMedico?.id === centroId);
@@ -69,6 +63,14 @@ export default function WizardReservaSecretaria({ isOpen, centroId, onClose, onS
     return medicosDelCentro.filter((medico) => medico.especialidades?.some((esp) => esp.id === Number(especialidadId)));
   }, [medicosDelCentro, especialidadId]);
 
+  // CAMBIO 3: disparar fetch de slots cuando cambia médico o fecha
+  useEffect(() => {
+    if (medicoId && fechaSelec) {
+      setSlotSelec('');
+      fetchSlots({ medicoId: Number(medicoId), fecha: fechaSelec });
+    }
+  }, [medicoId, fechaSelec, fetchSlots]);
+
   const resetForm = () => {
     setPacienteRut('');
     setPacienteNombre('');
@@ -78,7 +80,8 @@ export default function WizardReservaSecretaria({ isOpen, centroId, onClose, onS
     setMedicoId('');
     setServicioAdicionalId('');
     setSalaId('');
-    setFechaHora('');
+    setFechaSelec('');
+    setSlotSelec('');
     setError('');
     setRutValidado(false);
     setPacienteExiste(null);
@@ -100,17 +103,13 @@ export default function WizardReservaSecretaria({ isOpen, centroId, onClose, onS
       setError('Debe validar el RUT antes de continuar.');
       return;
     }
-    if (!fechaHora || !tipoReserva) {
+
+    // CAMBIO 4: validar slotSelec en lugar de fechaHora
+    if (!slotSelec || !tipoReserva) {
       setError('Complete tipo de reserva y horario.');
       return;
     }
 
-    if (new Date(fechaHora) < new Date()) {
-      setError('La fecha y hora de la reserva no puede estar en el pasado.');
-      return;
-    }
-    
-    // Se exige médico para todos los tipos de reserva ya que el backend lo requiere como obligatorio (not null).
     if (!medicoId) {
       setError('Seleccione un médico disponible.');
       return;
@@ -126,15 +125,13 @@ export default function WizardReservaSecretaria({ isOpen, centroId, onClose, onS
     }
 
     try {
-      const medicoIdParaReserva = Number(medicoId);
-
       await crearReserva({
         pacienteRut: normalizeRutForBackend(pacienteRut),
         pacienteNombreCompleto: pacienteNombre || undefined,
         pacienteCorreo: pacienteCorreo || undefined,
-        medicoId: medicoIdParaReserva,
+        medicoId: Number(medicoId),
         centroId,
-        fechaHora,
+        fechaHora: slotSelec,   // CAMBIO 5: usar slotSelec
         tipoReserva,
         origen: 'PRESENCIAL',
       }).unwrap();
@@ -170,34 +167,34 @@ export default function WizardReservaSecretaria({ isOpen, centroId, onClose, onS
 
         {rutValidado && (
           <div className="space-y-4 rounded-2xl border border-slate-200 p-4 bg-white">
-            
-            {/* 1. SELECTOR PRINCIPAL (Renderizado Dinámico) */}
+
+            {/* 1. SELECTOR PRINCIPAL */}
             <div>
               <label className="block text-sm font-medium text-on-surface ml-1 mb-1">Tipo de reserva *</label>
               <select value={tipoReserva} onChange={(e) => {
-                  setTipoReserva(e.target.value as any);
-                  setEspecialidadId('');
-                  setMedicoId('');
-                  setServicioAdicionalId('');
-                  setSalaId('');
-                }} 
+                setTipoReserva(e.target.value as any);
+                setEspecialidadId('');
+                setMedicoId('');
+                setServicioAdicionalId('');
+                setSalaId('');
+              }}
                 className="w-full rounded-2xl bg-surface-container-high px-4 py-3.5 text-sm outline-none focus:ring-2 focus:ring-primary">
                 {TIPOS_RESERVA.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
               </select>
             </div>
 
-            {/* 2. ESPECIALIDAD Y MÉDICO (Requerido para todos los tipos de reserva) */}
+            {/* 2. ESPECIALIDAD Y MÉDICO */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-on-surface ml-1 mb-1">Especialidad</label>
-                <select value={especialidadId} onChange={(e) => setEspecialidadId(e.target.value)} className="w-full rounded-2xl bg-surface-container-high px-4 py-3.5 text-sm outline-none focus:ring-2 focus:ring-primary">
+                <select value={especialidadId} onChange={(e) => { setEspecialidadId(e.target.value); setMedicoId(''); setFechaSelec(''); setSlotSelec(''); }} className="w-full rounded-2xl bg-surface-container-high px-4 py-3.5 text-sm outline-none focus:ring-2 focus:ring-primary">
                   <option value="">Todas</option>
                   {especialidadesDisponibles.map((esp) => <option key={esp.id} value={esp.id}>{esp.nombre}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-on-surface ml-1 mb-1">Médico *</label>
-                <select value={medicoId} onChange={(e) => setMedicoId(e.target.value)} className="w-full rounded-2xl bg-surface-container-high px-4 py-3.5 text-sm outline-none focus:ring-2 focus:ring-primary">
+                <select value={medicoId} onChange={(e) => { setMedicoId(e.target.value); setFechaSelec(''); setSlotSelec(''); }} className="w-full rounded-2xl bg-surface-container-high px-4 py-3.5 text-sm outline-none focus:ring-2 focus:ring-primary">
                   <option value="">Seleccione un médico disponible</option>
                   {doctoresFiltrados.map((medico) => (
                     <option key={medico.id} value={medico.id}>{medico.nombreCompleto} — {medico.especialidades?.[0]?.nombre || 'General'}</option>
@@ -253,8 +250,63 @@ export default function WizardReservaSecretaria({ isOpen, centroId, onClose, onS
               </div>
             )}
 
-            {/* 5. FECHA Y HORA (Aplica para todos) */}
-            <Input label="Fecha y hora *" type="datetime-local" min={minDateTime} value={fechaHora} onChange={(e) => setFechaHora(e.target.value)} />
+            {/* 5. FECHA Y HORA — CAMBIO 6: selector de fecha + grid de slots */}
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-on-surface ml-1 mb-1">Fecha *</label>
+                <input
+                  type="date"
+                  min={hoy}
+                  value={fechaSelec}
+                  onChange={e => { setFechaSelec(e.target.value); setSlotSelec(''); }}
+                  className="w-full rounded-2xl bg-surface-container-high px-4 py-3.5 text-sm outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+
+              {fechaSelec && medicoId && (
+                <div>
+                  <label className="block text-sm font-medium text-on-surface ml-1 mb-2">
+                    Horario disponible *
+                  </label>
+
+                  {loadSlots && (
+                    <p className="text-sm text-on-surface-variant py-2">Cargando horarios...</p>
+                  )}
+
+                  {!loadSlots && slots && slots.length === 0 && (
+                    <p className="text-sm text-red-600 py-2">
+                      No hay horarios disponibles para este médico en la fecha seleccionada.
+                    </p>
+                  )}
+
+                  {!loadSlots && slots && slots.length > 0 && (
+                    <div className="grid grid-cols-4 gap-2">
+                      {slots.map(slot => {
+                        const hora = new Date(slot).toLocaleTimeString('es-CL', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        });
+                        return (
+                          <button
+                            key={slot}
+                            type="button"
+                            onClick={() => setSlotSelec(slot)}
+                            className={`py-2 rounded-xl text-sm font-bold border-2 transition-all
+                              ${slotSelec === slot
+                                ? 'border-primary bg-primary text-on-primary'
+                                : 'border-outline-variant bg-surface-container text-on-surface hover:border-primary/60'
+                              }`}
+                          >
+                            {hora}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
           </div>
         )}
       </form>

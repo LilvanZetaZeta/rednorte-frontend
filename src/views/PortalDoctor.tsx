@@ -107,6 +107,7 @@ export default function PortalDoctor() {
         title="Finalizar Atención Clínica"
         message="¿Estás seguro de finalizar la consulta? Esto guardará la evolución y cerrará la ficha del paciente."
         confirmText="Finalizar Atención"
+        isLoading={vm.isUpdating}
         onConfirm={confirmarFinalizacion}
         onCancel={() => setFinalizarConfig({ isOpen: false, id: 0 })}
       />

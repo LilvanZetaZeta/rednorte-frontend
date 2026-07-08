@@ -36,9 +36,9 @@ export const usePortalPacienteVM = () => {
   const { data: ofertas = [], isLoading: loadingOfertas } = 
     useObtenerOfertasQuery(userId, { skip: !userId });
 
-  const [cancelar] = useCancelarReservaMutation();
-  const [crearPerfil] = useCrearPerfilMutation();
-  const [actualizarPerfil] = useActualizarPerfilMutation();
+  const [cancelar, { isLoading: isCanceling }] = useCancelarReservaMutation();
+  const [crearPerfil, { isLoading: isCreatingPerfil }] = useCrearPerfilMutation();
+  const [actualizarPerfil, { isLoading: isUpdatingPerfil }] = useActualizarPerfilMutation();
   
   // 3. Mutación para procesar la respuesta
   const [responderMutation, { isLoading: isProcesandoOferta }] = useResponderOfertaMutation();
@@ -47,8 +47,8 @@ export const usePortalPacienteVM = () => {
     try { 
       await cancelar(id).unwrap(); 
       return { success: true };
-    } catch { 
-      return { success: false, error: 'Error al cancelar la reserva.' }; 
+    } catch (err: any) { 
+      return { success: false, error: err?.data?.error || 'Error al cancelar la reserva.' }; 
     }
   };
 
@@ -60,8 +60,8 @@ export const usePortalPacienteVM = () => {
         await crearPerfil({ ...data, idAuth: userId }).unwrap();
       }
       return { success: true };
-    } catch {
-      return { success: false };
+    } catch (err: any) {
+      return { success: false, error: err?.data?.error || 'Error al guardar el perfil' };
     }
   };
 
@@ -75,9 +75,9 @@ export const usePortalPacienteVM = () => {
     try {
       await responderMutation({ ofertaId: ofertaPendiente.id, estado }).unwrap();
       return { success: true };
-    } catch (error) {
+    } catch (error: any) {
       console.error("Fallo al responder a la reasignación", error);
-      return { success: false, error: 'Hubo un problema de red al procesar tu respuesta.' };
+      return { success: false, error: error?.data?.error || 'Hubo un problema de red al procesar tu respuesta.' };
     }
   };
 
@@ -86,6 +86,8 @@ export const usePortalPacienteVM = () => {
     // CRÍTICO: Sumamos loadingOfertas para no renderizar la vista hasta que tengamos la respuesta del Gateway
     isLoading: loadingReservas || loadingPerfil || loadingOfertas,
     handleCancelar, handleGuardarPerfil,
+    isCanceling,
+    isGuardandoPerfil: isCreatingPerfil || isUpdatingPerfil,
     
     // 6. Exportamos las herramientas para la vista
     ofertaPendiente,
