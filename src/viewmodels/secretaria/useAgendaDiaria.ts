@@ -5,8 +5,8 @@ import type { IReserva } from '../../models/types';
 export const useAgendaDiaria = (reservas: IReserva[] | undefined) => {
   const [rutBusqueda, setRutBusqueda] = useState('');
   
-  const [actualizarEstado] = useActualizarEstadoReservaMutation();
-  const [cancelarReservaBackend] = useCancelarReservaMutation();
+  const [actualizarEstado, { isLoading: isUpdating }] = useActualizarEstadoReservaMutation();
+  const [cancelarReservaBackend, { isLoading: isCanceling }] = useCancelarReservaMutation();
 
   const reservasHoy = useMemo(() => {
     if (!reservas) return [];
@@ -67,6 +67,8 @@ export const useAgendaDiaria = (reservas: IReserva[] | undefined) => {
     stats,
     handleCheckIn,
     handleCancelarCita,
-    handleMarcarInasistencia
+    handleMarcarInasistencia,
+    isUpdating,
+    isCanceling
   };
 };

@@ -18,33 +18,37 @@ export const reservasApi = apiGateway.injectEndpoints({
       query: (idAuth) => `/portal/reservas/paciente/${idAuth}`,
       providesTags: ['Reservas'],
     }),
+    obtenerSlotsDisponibles: builder.query<string[], { medicoId: number; fecha: string }>({
+      query: ({ medicoId, fecha }) =>
+        `/portal/reservas/slots-disponibles?medicoId=${medicoId}&fecha=${fecha}`,
+    }),
     obtenerReservasPorCentro: builder.query<PageResponse<IReserva>, { centroId: number; page?: number; size?: number }>({
-      query: ({ centroId, page = 0, size = 20 }) => 
+      query: ({ centroId, page = 0, size = 20 }) =>
         `/portal/reservas/centro/${centroId}?page=${page}&size=${size}`,
       providesTags: ['Reservas'],
     }),
     obtenerReservasPorMedico: builder.query<PageResponse<IReserva>, { medicoId: number; page?: number; size?: number }>({
-      query: ({ medicoId, page = 0, size = 20 }) => 
+      query: ({ medicoId, page = 0, size = 20 }) =>
         `/portal/reservas/medico/${medicoId}?page=${page}&size=${size}`,
       providesTags: ['Reservas'],
     }),
     crearReserva: builder.mutation<IReserva, CrearReservaPayload>({
-      query: (body) => ({ 
-        url: '/gestion/reservas', 
-        method: 'POST', 
-        body 
+      query: (body) => ({
+        url: '/gestion/reservas',
+        method: 'POST',
+        body
       }),
       invalidatesTags: ['Reservas'],
     }),
     cancelarReserva: builder.mutation<void, number>({
-      query: (id) => ({ 
-        url: `/gestion/reservas/${id}/cancelar`, 
-        method: 'PUT' 
+      query: (id) => ({
+        url: `/gestion/reservas/${id}/cancelar`,
+        method: 'PUT'
       }),
       invalidatesTags: ['Reservas'],
     }),
     actualizarEstadoReserva: builder.mutation<void, { id: number, estado: string }>({
-      query: ({ id, estado }) => ({ 
+      query: ({ id, estado }) => ({
         url: `/gestion/reservas/${id}`,
         method: 'PATCH',
         body: { estado }
@@ -52,10 +56,10 @@ export const reservasApi = apiGateway.injectEndpoints({
       invalidatesTags: ['Reservas'],
     }),
     bloquearAgendaMedico: builder.mutation<void, { medicoId: number, fechaBloqueo: string }>({
-      query: (body) => ({ 
-        url: '/gestion/reservas/reasignaciones/agenda/bloquear', 
-        method: 'POST', 
-        body 
+      query: (body) => ({
+        url: '/gestion/reservas/reasignaciones/agenda/bloquear',
+        method: 'POST',
+        body
       }),
       invalidatesTags: ['Reservas'],
     }),
@@ -84,16 +88,18 @@ export const reservasApi = apiGateway.injectEndpoints({
   }),
 });
 
-export const { 
-  useObtenerMisReservasQuery, 
+export const {
+  useObtenerMisReservasQuery,
   useObtenerReservasPorCentroQuery,
-  useObtenerReservasPorMedicoQuery, 
-  useCrearReservaMutation, 
+  useObtenerReservasPorMedicoQuery,
+  useCrearReservaMutation,
   useCancelarReservaMutation,
   useActualizarEstadoReservaMutation,
   useBloquearAgendaMedicoMutation,
   useGuardarEvolucionClinicaMutation,
   useObtenerHistorialPorReservaQuery,
   useObtenerHistorialPorPacienteQuery,
-  useLazyObtenerHistorialPorPacienteQuery
+  useLazyObtenerHistorialPorPacienteQuery,
+  useObtenerSlotsDisponiblesQuery,
+  useLazyObtenerSlotsDisponiblesQuery,
 } = reservasApi;

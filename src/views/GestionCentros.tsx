@@ -182,6 +182,7 @@ export default function GestionCentros() {
         message={`¿Estás seguro de eliminar el centro "${eliminarConfig.nombre}"? Esta acción no se puede deshacer y puede afectar las reservas asociadas.`}
         isDestructive={true}
         confirmText="Sí, eliminar"
+        isLoading={isSubmitting}
         onConfirm={confirmarEliminacion}
         onCancel={() => setEliminarConfig({ isOpen: false, id: 0, nombre: '' })}
       />

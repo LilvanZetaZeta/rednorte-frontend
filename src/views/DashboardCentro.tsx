@@ -331,6 +331,7 @@ export default function DashboardCentro() {
         confirmText="Sí, eliminar"
         cancelText="Cancelar"
         isDestructive={true}
+        isLoading={vm.isEliminando}
         onConfirm={confirmarEliminacion}
         onCancel={() => setEliminarConfig({ isOpen: false, id: 0, nombre: '' })}
       />
